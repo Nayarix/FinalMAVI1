@@ -1,80 +1,65 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "U:\\visual\\Proyectos\\FinalMAVI1\\",
+  "WorkspaceRootPath": "U:\\visual\\Proyectos\\FinalMAVI1\\FinalMAVI1\\FinalMAVI1\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{458F9651-0891-40A6-9EEB-C931B6C33026}|FinalMAVI1.vcxproj|U:\\visual\\Proyectos\\FinalMAVI1\\Game.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{458F9651-0891-40A6-9EEB-C931B6C33026}|FinalMAVI1.vcxproj|solutionrelative:Game.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{458F9651-0891-40A6-9EEB-C931B6C33026}|FinalMAVI1.vcxproj|U:\\visual\\Proyectos\\FinalMAVI1\\Game.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "AbsoluteMoniker": "D:0:0:{458F9651-0891-40A6-9EEB-C931B6C33026}|FinalMAVI1.vcxproj|U:\\visual\\Proyectos\\FinalMAVI1\\FinalMAVI1\\FinalMAVI1\\Game.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
       "RelativeMoniker": "D:0:0:{458F9651-0891-40A6-9EEB-C931B6C33026}|FinalMAVI1.vcxproj|solutionrelative:Game.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{458F9651-0891-40A6-9EEB-C931B6C33026}|FinalMAVI1.vcxproj|C:\\SFML-2.5.1\\INCLUDE\\SFML\\WINDOW\\WINDOW.HPP||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+      "AbsoluteMoniker": "D:0:0:{458F9651-0891-40A6-9EEB-C931B6C33026}|FinalMAVI1.vcxproj|U:\\visual\\Proyectos\\FinalMAVI1\\FinalMAVI1\\FinalMAVI1\\Game.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{458F9651-0891-40A6-9EEB-C931B6C33026}|FinalMAVI1.vcxproj|solutionrelative:Game.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{458F9651-0891-40A6-9EEB-C931B6C33026}|FinalMAVI1.vcxproj|U:\\visual\\Proyectos\\FinalMAVI1\\main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "AbsoluteMoniker": "D:0:0:{458F9651-0891-40A6-9EEB-C931B6C33026}|FinalMAVI1.vcxproj|U:\\visual\\Proyectos\\FinalMAVI1\\FinalMAVI1\\FinalMAVI1\\main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
       "RelativeMoniker": "D:0:0:{458F9651-0891-40A6-9EEB-C931B6C33026}|FinalMAVI1.vcxproj|solutionrelative:main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     }
   ],
   "DocumentGroupContainers": [
     {
       "Orientation": 0,
-      "VerticalTabListWidth": 256,
+      "VerticalTabListWidth": 111,
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 3,
+          "SelectedChildIndex": 2,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "Window.hpp",
-              "DocumentMoniker": "C:\\SFML-2.5.1\\include\\SFML\\Window\\Window.hpp",
-              "ToolTip": "C:\\SFML-2.5.1\\include\\SFML\\Window\\Window.hpp",
-              "ViewState": "AgIAAKkBAAAAAAAAAAAwwL0BAAABAAAAAAAAAA==",
+              "DocumentIndex": 1,
+              "Title": "Game.h",
+              "DocumentMoniker": "U:\\visual\\Proyectos\\FinalMAVI1\\FinalMAVI1\\FinalMAVI1\\Game.h",
+              "RelativeDocumentMoniker": "Game.h",
+              "ToolTip": "U:\\visual\\Proyectos\\FinalMAVI1\\FinalMAVI1\\FinalMAVI1\\Game.h",
+              "RelativeToolTip": "Game.h",
+              "ViewState": "AgIAAAYAAAAAAAAAAAAAAB4AAAAXAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
-              "WhenOpened": "2025-08-21T23:58:09.448Z",
+              "WhenOpened": "2025-08-16T21:37:14.35Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 2,
               "Title": "main.cpp",
-              "DocumentMoniker": "U:\\visual\\Proyectos\\FinalMAVI1\\main.cpp",
+              "DocumentMoniker": "U:\\visual\\Proyectos\\FinalMAVI1\\FinalMAVI1\\FinalMAVI1\\main.cpp",
               "RelativeDocumentMoniker": "main.cpp",
-              "ToolTip": "U:\\visual\\Proyectos\\FinalMAVI1\\main.cpp",
+              "ToolTip": "U:\\visual\\Proyectos\\FinalMAVI1\\FinalMAVI1\\FinalMAVI1\\main.cpp",
               "RelativeToolTip": "main.cpp",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAQAAAA2AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
-              "WhenOpened": "2025-08-16T21:30:13.928Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "Game.cpp",
-              "DocumentMoniker": "U:\\visual\\Proyectos\\FinalMAVI1\\Game.cpp",
-              "RelativeDocumentMoniker": "Game.cpp",
-              "ToolTip": "U:\\visual\\Proyectos\\FinalMAVI1\\Game.cpp",
-              "RelativeToolTip": "Game.cpp",
-              "ViewState": "AgIAAEwAAAAAAAAAAAAuwG0AAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
-              "WhenOpened": "2025-08-16T21:37:32.773Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-08-16T21:30:13.928Z"
             },
             {
               "$type": "Document",
               "DocumentIndex": 0,
-              "Title": "Game.h",
-              "DocumentMoniker": "U:\\visual\\Proyectos\\FinalMAVI1\\Game.h",
-              "RelativeDocumentMoniker": "Game.h",
-              "ToolTip": "U:\\visual\\Proyectos\\FinalMAVI1\\Game.h",
-              "RelativeToolTip": "Game.h",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAABAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
-              "WhenOpened": "2025-08-16T21:37:14.35Z",
+              "Title": "Game.cpp",
+              "DocumentMoniker": "U:\\visual\\Proyectos\\FinalMAVI1\\FinalMAVI1\\FinalMAVI1\\Game.cpp",
+              "RelativeDocumentMoniker": "Game.cpp",
+              "ToolTip": "U:\\visual\\Proyectos\\FinalMAVI1\\FinalMAVI1\\FinalMAVI1\\Game.cpp",
+              "RelativeToolTip": "Game.cpp",
+              "ViewState": "AgIAAAEAAAAAAAAAAAAAAAgAAAApAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2025-08-16T21:37:32.773Z",
               "EditorCaption": ""
             }
           ]

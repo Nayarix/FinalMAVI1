@@ -3,50 +3,52 @@
 
 using namespace sf;
 
-// Constructor: Inicializa la ventana y los objetos del juego
 Game::Game() {
-    //  Crear la ventana de SFML
-    window = new RenderWindow(VideoMode(1500, 750), "Mi Juego SFML con POO");
-    window->setFramerateLimit(60); // Limita FPS para control
-    
-    
+    window = new RenderWindow(VideoMode::getDesktopMode(), "Mi Juego SFML con POO", Style::Fullscreen);
+    window->setFramerateLimit(60);
+    window->setMouseCursorVisible(false);
+    is_fullscreen = true;
 
-    //  Cargar la imagen en la textura miembro de la clase
+    // Cargar la imagen de fondo
     if (!backgroundTexture.loadFromFile("BloquesMAVI1/fondoPrueba2.jpg")) {
         std::cerr << "Error al cargar el fondo" << std::endl;
-        // Dependiendo de tu lógica, podrías cerrar la ventana o cargar un fondo de fallback
     }
+    backgroundSprite.setTexture(backgroundTexture);
 
-    // Asignar la textura al sprite miembro de la clase
-    backgroundSprite.setTexture(backgroundTexture);  
 
-	// Establecer el tamaño del sprite al tamaño de la ventana
+    // Ajustar la imagen de fondo al tamaño de la ventana al iniciar el programa
     float originalWidth = backgroundTexture.getSize().x;
-    float originalHeight = backgroundTexture.getSize().y;
-
-    // Obtener las dimensiones de la ventana
     float windowWidth = window->getSize().x;
-    float windowHeight = window->getSize().y;
-
-    // Calcular la escala para que la imagen se ajuste al ancho de la ventana
     float scale = windowWidth / originalWidth;
-
-    // Aplicar la escala al sprite
     backgroundSprite.setScale(scale, scale);
 
-	 // Oculta el cursor del sistema
-     
-    window->setMouseCursorVisible(false);
+    // Cargar todas las texturas de bloques y almacenarlas en el vector
+    // Asegúrate de tener estas imágenes en tu carpeta
+    sf::Texture Espada, Escudo, Corona;
+    if (!Espada.loadFromFile("BloquesMAVI1/Espada.png") ||
+        !Escudo.loadFromFile("BloquesMAVI1/Escudo.png") ||
+        !Corona.loadFromFile("BloquesMAVI1/Corona.png")) {
+        std::cerr << "Error al cargar las texturas de bloques" << std::endl;
+    }
+    blockTextures.push_back(Espada);
+    blockTextures.push_back(Escudo);
+    blockTextures.push_back(Corona);
 
-    // Carga la imagen y la asigna al sprite del cursor
-    
-    mat_cursor.loadFromFile("BloquesMAVI1/Escudo.png");
-    cursor.setTexture(mat_cursor);
-    cursor.setPosition(0, 0);
-    cursor.setScale(0.5, 0.5);
+    // Inicializar el sprite del bloque que sigue al mouse
+    currentTextureIndex = 0;
+    blockSprite.setTexture(blockTextures[currentTextureIndex]);
+    blockSprite.setScale(0.25f, 0.25f); // Escala inicial del bloque, a ajustar en tiempo real
 
 
-    // Cargar fuente para texto
+    // Escalar el sprite del bloque al iniciar el programa
+// (Esta es la versión del constructor, no la del evento Resized)
+    float originalBlockWidth = blockTextures[0].getSize().x;
+    float windowWidth_initial = window->getSize().x;
+    float scale_initial = (windowWidth_initial / 1990.0f) * 0.25f;
+    blockSprite.setScale(scale_initial, scale_initial);
+
+
+    // Cargar fuente y texto
     if (!font.loadFromFile("arial.ttf")) {
         std::cerr << "Error al cargar la fuente arial.ttf" << std::endl;
     }
@@ -57,20 +59,21 @@ Game::Game() {
     text.setPosition(10.f, 10.f);
 }
 
-// Destructor: Libera la memoria asignada dinámicamente
 Game::~Game() {
     delete window;
     window = nullptr;
 }
 
-// Bucle principal del juego
 void Game::run() {
     while (window->isOpen()) {
-        sf::Time deltaTime = clock.restart();
         processEvents();
         render();
     }
 }
+
+
+
+
 
 // Procesa eventos de usuario
 void Game::processEvents() {
@@ -79,32 +82,106 @@ void Game::processEvents() {
         if (event.type == sf::Event::Closed) {
             window->close();
         }
+
+        // Mover el sprite del bloque con el mouse
         if (event.type == sf::Event::MouseMoved) {
-            // Actualizamos la posición del sprite con la información del evento
-            cursor.setPosition(event.mouseMove.x, event.mouseMove.y);
+            blockSprite.setPosition(static_cast<float>(event.mouseMove.x), static_cast<float>(event.mouseMove.y));
         }
 
-        // --- Nuevo código para redimensionar el fondo en tiempo real ---
+        // Colocar un bloque en la pantalla al hacer clic
+        if (event.type == sf::Event::MouseButtonPressed) {
+            if (event.mouseButton.button == sf::Mouse::Left) {
+                // Crear un nuevo sprite y configurarlo
+                sf::Sprite newBlock = blockSprite;
+                newBlock.setPosition(static_cast<float>(event.mouseButton.x), static_cast<float>(event.mouseButton.y));
+                // Añadir el nuevo bloque al vector de bloques colocados
+                placedBlocks.push_back(newBlock);
+            }
+        }
+
+        // Cambiar la textura del bloque con la tecla 'Espacio'
+        if (event.type == sf::Event::KeyPressed) {
+            if (event.key.code == sf::Keyboard::Space) {
+                currentTextureIndex++;
+                if (currentTextureIndex >= blockTextures.size()) {
+                    currentTextureIndex = 0;
+                }
+                blockSprite.setTexture(blockTextures[currentTextureIndex]);
+            }
+
+            // --- NUEVO CÓDIGO: Alternar pantalla completa ---
+            if (event.key.code == sf::Keyboard::P) {
+                // Alternar el estado de pantalla completa
+                if (is_fullscreen ) { 
+                    // Cambiar a modo ventana
+                    window->create(sf::VideoMode(1500, 852), "Mi Juego SFML con POO", sf::Style::Default);
+                    is_fullscreen = false;
+                }
+                else {
+                    // Cambiar a modo pantalla completa
+                    window->create(sf::VideoMode::getDesktopMode(), "Mi Juego SFML con POO", sf::Style::Fullscreen);
+                    is_fullscreen = true;
+                }
+                // Limitar los FPS y ajustar el escalado después de recrear la ventana
+                window->setFramerateLimit(60);
+                sf::FloatRect visibleArea(0, 0, static_cast<float>(window->getSize().x), static_cast<float>(window->getSize().y));
+                window->setView(sf::View(visibleArea));
+
+                scaleSpriteToWindow(backgroundSprite, backgroundTexture);
+
+                // Recalcular la escala del bloque
+                float originalBlockWidth = blockTextures[0].getSize().x;
+                float windowWidth = window->getSize().x;
+                float scale = (windowWidth / 1990.0f) * 0.25f;
+                blockSprite.setScale(scale, scale);
+
+                for (auto& block : placedBlocks) {
+                    block.setScale(scale, scale);
+                }
+
+                std::cout << "Tamaño de la ventana: " << window->getSize().x << " x " << window->getSize().y << std::endl;
+            }
+            // ----------------------------------------------------
+        }
+
+        // Redimensionar sprites en tiempo real
         if (event.type == sf::Event::Resized) {
-            // Recalcula y aplica la escala del fondo
-            float originalWidth = backgroundTexture.getSize().x;
-            float windowWidth = window->getSize().x;
-            float scale = windowWidth / originalWidth;
-            backgroundSprite.setScale(scale, scale);
-
-            // Opcional: ajustar la vista para mantener la proporción de la ventana
-            sf::FloatRect visibleArea(0, 0, event.size.width, event.size.height);
+            sf::FloatRect visibleArea(0, 0, static_cast<float>(event.size.width), static_cast<float>(event.size.height));
             window->setView(sf::View(visibleArea));
+
+            scaleSpriteToWindow(backgroundSprite, backgroundTexture);
+
+            float originalBlockWidth = blockTextures[0].getSize().x;
+            float windowWidth = window->getSize().x;
+            float scale = (windowWidth / 1990.0f) * 0.25f;
+            blockSprite.setScale(scale, scale);
+
+            for (auto& block : placedBlocks) {
+                block.setScale(scale, scale);
+            }
         }
-        // -----------------------------------------------------------------
     }
 }
 
-// Dibuja en pantalla
+
 void Game::render() {
-    window->clear(); // Limpia la pantalla
+    window->clear();
     window->draw(backgroundSprite);
+
+    // Dibuja todos los bloques colocados
+    for (const auto& block : placedBlocks) {
+        window->draw(block);
+    }
+
+    window->draw(blockSprite); // Dibuja el bloque que sigue al cursor
     window->draw(text);
-    window->draw(cursor);
     window->display();
+}
+
+// Nueva función reutilizable para escalar sprites
+void Game::scaleSpriteToWindow(sf::Sprite& sprite, const sf::Texture& texture) {
+    float originalWidth = static_cast<float>(texture.getSize().x);
+    float windowWidth = static_cast<float>(window->getSize().x);
+    float scale = windowWidth / originalWidth;
+    sprite.setScale(scale, scale);
 }

@@ -2,26 +2,35 @@
 #define GAME_H
 
 #include <SFML/Graphics.hpp>
+#include <vector> // Necesitas incluir la cabecera para std::vector
 
 class Game {
 public:
-    Game();             // Constructor
-    ~Game();            // Destructor
-    void run();         // Bucle principal del juego
+    Game();
+    ~Game();
+    void run();
 
 private:
-    void processEvents();       // Maneja los eventos de entrada
-    void render();              // Dibuja en pantalla
+    void processEvents();
+    void render();
+    void scaleSpriteToWindow(sf::Sprite& sprite, const sf::Texture& texture);
 
-    sf::RenderWindow* window; // Puntero a la ventana de SFML
-    sf::Font font;              // Fuente para el texto
-    sf::Text text;              // Objeto de texto
+
+    sf::RenderWindow* window;
+    sf::Font font;
+    sf::Text text;
     sf::Texture backgroundTexture;
     sf::Sprite backgroundSprite;
-    sf::Clock clock;            // Reloj para calcular delta time
+    sf::Clock clock;
     sf::Sprite cursor;
-    sf::Texture mat_cursor;
 
+    // Bloques del juego
+    sf::Sprite blockSprite; // Sprite del bloque que sigue al cursor
+    std::vector<sf::Texture> blockTextures; // Vector para almacenar todas las texturas de bloques
+    int currentTextureIndex; // Índice de la textura actual
+    bool is_fullscreen;
+    // Vector para almacenar todos los bloques colocados
+    std::vector<sf::Sprite> placedBlocks;
 };
 
 #endif // GAME_H
