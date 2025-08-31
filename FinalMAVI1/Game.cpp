@@ -23,7 +23,7 @@ Game::Game() {
     backgroundSprite.setScale(scale, scale);
 
     // Cargar todas las texturas de bloques y almacenarlas en el vector
-    // Asegúrate de tener estas imágenes en tu carpeta
+
     sf::Texture Espada, Escudo, Corona;
     if (!Espada.loadFromFile("BloquesMAVI1/Espada.png") ||
         !Escudo.loadFromFile("BloquesMAVI1/Escudo.png") ||
@@ -41,7 +41,7 @@ Game::Game() {
 
 
     // Escalar el sprite del bloque al iniciar el programa
-// (Esta es la versión del constructor, no la del evento Resized)
+
     float originalBlockWidth = blockTextures[0].getSize().x;
     float windowWidth_initial = window->getSize().x;
     float scale_initial = (windowWidth_initial / 1990.0f) * 0.25f;
@@ -104,49 +104,28 @@ void Game::processEvents() {
             if (event.key.code == sf::Keyboard::Space) {
                 currentTextureIndex++;
                 if (currentTextureIndex >= blockTextures.size()) {
-                    currentTextureIndex = 0;
+                    currentTextureIndex = 0; // Volver al inicio si se llega al final
                 }
                 blockSprite.setTexture(blockTextures[currentTextureIndex]);
             }
-
-            // --- NUEVO CÓDIGO: Alternar pantalla completa ---
+            // Alternar pantalla completa
             if (event.key.code == sf::Keyboard::P) {
-                // Alternar el estado de pantalla completa
-                if (is_fullscreen ) { 
-                    // Cambiar a modo ventana
+                if (is_fullscreen) {
                     window->create(sf::VideoMode(1500, 852), "Mi Juego SFML con POO", sf::Style::Default);
                     is_fullscreen = false;
                 }
                 else {
-                    // Cambiar a modo pantalla completa
                     window->create(sf::VideoMode::getDesktopMode(), "Mi Juego SFML con POO", sf::Style::Fullscreen);
                     is_fullscreen = true;
                 }
-                // Limitar los FPS y ajustar el escalado después de recrear la ventana
+                window->setMouseCursorVisible(!is_fullscreen);
                 window->setFramerateLimit(60);
-                sf::FloatRect visibleArea(0, 0, static_cast<float>(window->getSize().x), static_cast<float>(window->getSize().y));
-                window->setView(sf::View(visibleArea));
-
-                scaleSpriteToWindow(backgroundSprite, backgroundTexture);
-
-                // Recalcular la escala del bloque
-                float originalBlockWidth = blockTextures[0].getSize().x;
-                float windowWidth = window->getSize().x;
-                float scale = (windowWidth / 1990.0f) * 0.25f;
-                blockSprite.setScale(scale, scale);
-
-                for (auto& block : placedBlocks) {
-                    block.setScale(scale, scale);
-                }
-
-                std::cout << "Tamaño de la ventana: " << window->getSize().x << " x " << window->getSize().y << std::endl;
             }
-            // ----------------------------------------------------
         }
 
         // Redimensionar sprites en tiempo real
-        if (event.type == sf::Event::Resized) {
-            sf::FloatRect visibleArea(0, 0, static_cast<float>(event.size.width), static_cast<float>(event.size.height));
+        if (event.type == sf::Event::Resized || (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::P)) {
+            sf::FloatRect visibleArea(0, 0, static_cast<float>(window->getSize().x), static_cast<float>(window->getSize().y));
             window->setView(sf::View(visibleArea));
 
             scaleSpriteToWindow(backgroundSprite, backgroundTexture);
@@ -156,9 +135,20 @@ void Game::processEvents() {
             float scale = (windowWidth / 1990.0f) * 0.25f;
             blockSprite.setScale(scale, scale);
 
+            // Recalcular y aplicar la escala y posición a los bloques ya colocados
             for (auto& block : placedBlocks) {
+                sf::Vector2f oldPos = block.getPosition();
+                sf::Vector2f oldScale = block.getScale();
+
+                // Calcular la nueva posición en proporción a la escala
+                float newPosX = oldPos.x * (scale / oldScale.x);
+                float newPosY = oldPos.y * (scale / oldScale.y);
+
+                // Aplicar la nueva escala y posición
                 block.setScale(scale, scale);
+                block.setPosition(newPosX, newPosY);
             }
+            std::cout << "Tamaño de la ventana: " << window->getSize().x << " x " << window->getSize().y << std::endl;
         }
     }
 }

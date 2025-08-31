@@ -2,7 +2,7 @@
 #define GAME_H
 
 #include <SFML/Graphics.hpp>
-#include <vector> // Necesitas incluir la cabecera para std::vector
+#include <vector> 
 
 class Game {
 public:
@@ -23,13 +23,11 @@ private:
     sf::Sprite backgroundSprite;
     sf::Clock clock;
     sf::Sprite cursor;
-
-    // Bloques del juego
-    sf::Sprite blockSprite; // Sprite del bloque que sigue al cursor
-    std::vector<sf::Texture> blockTextures; // Vector para almacenar todas las texturas de bloques
-    int currentTextureIndex; // Índice de la textura actual
+    sf::Sprite blockSprite; 
+    std::vector<sf::Texture> blockTextures; 
+    int currentTextureIndex; 
     bool is_fullscreen;
-    // Vector para almacenar todos los bloques colocados
+   
     std::vector<sf::Sprite> placedBlocks;
 };
 
