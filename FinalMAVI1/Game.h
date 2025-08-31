@@ -12,6 +12,7 @@ public:
 
 private:
     void processEvents();
+    void update(sf::Time deltaTime);
     void render();
     void scaleSpriteToWindow(sf::Sprite& sprite, const sf::Texture& texture);
 
@@ -22,13 +23,19 @@ private:
     sf::Texture backgroundTexture;
     sf::Sprite backgroundSprite;
     sf::Clock clock;
+
+
     sf::Sprite cursor;
-    sf::Sprite blockSprite; 
-    std::vector<sf::Texture> blockTextures; 
-    int currentTextureIndex; 
+    sf::Sprite blockSprite;
+    std::vector<sf::Texture> blockTextures;
+    int currentTextureIndex;
     bool is_fullscreen;
-   
+
     std::vector<sf::Sprite> placedBlocks;
+
+    std::vector<sf::Vector2f> blockVelocities;
+    const float gravity;
+
 };
 
 #endif // GAME_H

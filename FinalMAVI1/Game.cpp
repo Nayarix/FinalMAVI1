@@ -3,7 +3,7 @@
 
 using namespace sf;
 
-Game::Game() {
+Game::Game() : gravity(500.f) { // Se usa un valor mayor para una caída más visible
     window = new RenderWindow(VideoMode::getDesktopMode(), "Mi Juego SFML con POO", Style::Fullscreen);
     window->setFramerateLimit(60);
     window->setMouseCursorVisible(false);
@@ -15,15 +15,13 @@ Game::Game() {
     }
     backgroundSprite.setTexture(backgroundTexture);
 
-
     // Ajustar la imagen de fondo al tamaño de la ventana al iniciar el programa
     float originalWidth = backgroundTexture.getSize().x;
     float windowWidth = window->getSize().x;
     float scale = windowWidth / originalWidth;
     backgroundSprite.setScale(scale, scale);
 
-    // Cargar todas las texturas de bloques y almacenarlas en el vector
-
+    // Cargar todas las texturas de bloques
     sf::Texture Espada, Escudo, Corona;
     if (!Espada.loadFromFile("BloquesMAVI1/Espada.png") ||
         !Escudo.loadFromFile("BloquesMAVI1/Escudo.png") ||
@@ -37,16 +35,10 @@ Game::Game() {
     // Inicializar el sprite del bloque que sigue al mouse
     currentTextureIndex = 0;
     blockSprite.setTexture(blockTextures[currentTextureIndex]);
-    blockSprite.setScale(0.25f, 0.25f); // Escala inicial del bloque, a ajustar en tiempo real
-
-
-    // Escalar el sprite del bloque al iniciar el programa
-
     float originalBlockWidth = blockTextures[0].getSize().x;
     float windowWidth_initial = window->getSize().x;
     float scale_initial = (windowWidth_initial / 1990.0f) * 0.25f;
     blockSprite.setScale(scale_initial, scale_initial);
-
 
     // Cargar fuente y texto
     if (!font.loadFromFile("arial.ttf")) {
@@ -65,17 +57,15 @@ Game::~Game() {
 }
 
 void Game::run() {
+    sf::Clock frameClock;
     while (window->isOpen()) {
+        sf::Time deltaTime = frameClock.restart();
         processEvents();
+        update(deltaTime);
         render();
     }
 }
 
-
-
-
-
-// Procesa eventos de usuario
 void Game::processEvents() {
     sf::Event event;
     while (window->pollEvent(event)) {
@@ -94,8 +84,10 @@ void Game::processEvents() {
                 // Crear un nuevo sprite y configurarlo
                 sf::Sprite newBlock = blockSprite;
                 newBlock.setPosition(static_cast<float>(event.mouseButton.x), static_cast<float>(event.mouseButton.y));
-                // Añadir el nuevo bloque al vector de bloques colocados
+
+                // Añadir el nuevo bloque y su velocidad inicial
                 placedBlocks.push_back(newBlock);
+                blockVelocities.push_back(sf::Vector2f(0.f, 0.f));
             }
         }
 
@@ -104,7 +96,7 @@ void Game::processEvents() {
             if (event.key.code == sf::Keyboard::Space) {
                 currentTextureIndex++;
                 if (currentTextureIndex >= blockTextures.size()) {
-                    currentTextureIndex = 0; // Volver al inicio si se llega al final
+                    currentTextureIndex = 0;
                 }
                 blockSprite.setTexture(blockTextures[currentTextureIndex]);
             }
@@ -135,21 +127,70 @@ void Game::processEvents() {
             float scale = (windowWidth / 1990.0f) * 0.25f;
             blockSprite.setScale(scale, scale);
 
-            // Recalcular y aplicar la escala y posición a los bloques ya colocados
             for (auto& block : placedBlocks) {
                 sf::Vector2f oldPos = block.getPosition();
                 sf::Vector2f oldScale = block.getScale();
 
-                // Calcular la nueva posición en proporción a la escala
                 float newPosX = oldPos.x * (scale / oldScale.x);
                 float newPosY = oldPos.y * (scale / oldScale.y);
 
-                // Aplicar la nueva escala y posición
                 block.setScale(scale, scale);
                 block.setPosition(newPosX, newPosY);
             }
             std::cout << "Tamaño de la ventana: " << window->getSize().x << " x " << window->getSize().y << std::endl;
         }
+    }
+}
+
+
+void Game::update(sf::Time deltaTime) {
+    for (size_t i = 0; i < placedBlocks.size(); ++i) {
+        // Aplica la gravedad a la velocidad (MRUV)
+        blockVelocities[i].y += gravity * deltaTime.asSeconds();
+
+        // Obtiene la posición actual y calcula la siguiente
+        sf::Vector2f currentPos = placedBlocks[i].getPosition();
+        sf::Vector2f nextPos = currentPos;
+        nextPos.y += blockVelocities[i].y * deltaTime.asSeconds();
+
+        // --- Detección de colisiones con los bordes de la pantalla ---
+        // Se crea un área de colisión más pequeña para evitar el espacio
+        sf::FloatRect blockBounds = placedBlocks[i].getGlobalBounds();
+
+        // Ajusta la altura y el ancho del área de colisión
+        blockBounds.height *= 0.85f;
+        blockBounds.width *= 0.85f;
+
+        if (nextPos.y + blockBounds.height >= window->getSize().y) {
+            nextPos.y = window->getSize().y - blockBounds.height;
+            blockVelocities[i].y = 0.f; // Detiene la caída
+        }
+
+        // --- Detección de colisiones entre bloques ---
+        for (size_t j = 0; j < placedBlocks.size(); ++j) {
+            if (i == j) continue;
+
+            sf::FloatRect otherBlockBounds = placedBlocks[j].getGlobalBounds();
+
+            // Ajusta la altura y el ancho del área de colisión del otro bloque
+            otherBlockBounds.height *= 0.85f;
+            otherBlockBounds.width *= 0.85f;
+
+            sf::FloatRect nextBounds = blockBounds;
+            nextBounds.top = nextPos.y;
+
+            if (nextBounds.intersects(otherBlockBounds)) {
+                // Si el bloque que cae está encima del otro
+                if (blockVelocities[i].y > 0 && currentPos.y < otherBlockBounds.top) {
+                    // Ajusta la posición del bloque para que se "asiente" perfectamente
+                    nextPos.y = otherBlockBounds.top - blockBounds.height;
+                    blockVelocities[i].y = 0.f;
+                }
+            }
+        }
+
+        // Finalmente, actualiza la posición del bloque a la posición calculada
+        placedBlocks[i].setPosition(placedBlocks[i].getPosition().x, nextPos.y);
     }
 }
 
@@ -163,12 +204,11 @@ void Game::render() {
         window->draw(block);
     }
 
-    window->draw(blockSprite); // Dibuja el bloque que sigue al cursor
+    window->draw(blockSprite);
     window->draw(text);
     window->display();
 }
 
-// Nueva función reutilizable para escalar sprites
 void Game::scaleSpriteToWindow(sf::Sprite& sprite, const sf::Texture& texture) {
     float originalWidth = static_cast<float>(texture.getSize().x);
     float windowWidth = static_cast<float>(window->getSize().x);
