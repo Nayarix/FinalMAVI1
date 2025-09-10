@@ -45,19 +45,12 @@ Game::Game() : gravity(500.f) {
     text.setString("Bienvenido a SFML!");
     text.setPosition(10.f, 10.f);
 
-    // --- POSICIONES MANUALES DE LAS COLUMNAS ---
-    columnPositions = {
-        150.f, // Columna 1
-        400.f, // Columna 2
-        650.f, // Columna 3
-        900.f, // Columna 4 (Centro)
-        1150.f, // Columna 5
-        1400.f, // Columna 6
-        1650.f  // Columna 7
-    };
-
-    currentColumnIndex = 3; // Posición central inicial
+    currentColumnIndex = 3;
     isBlockLaunched = false;
+
+    oldWindowSize = static_cast<sf::Vector2f>(window->getSize());
+
+    recalculatePositions();
     spawnNewBlock();
 }
 
@@ -85,23 +78,20 @@ void Game::processEvents() {
 
         if (event.type == sf::Event::KeyPressed) {
             if (!isBlockLaunched) {
-                // Mover el bloque actual
                 if (event.key.code == sf::Keyboard::Left) {
                     currentColumnIndex = std::max(0, currentColumnIndex - 1);
-                    spawnNewBlock(); // Regenerar el bloque en la nueva posición
+                    spawnNewBlock();
                 }
                 if (event.key.code == sf::Keyboard::Right) {
                     currentColumnIndex = std::min(static_cast<int>(columnPositions.size()) - 1, currentColumnIndex + 1);
-                    spawnNewBlock(); // Regenerar el bloque en la nueva posición
+                    spawnNewBlock();
                 }
-                // Lanzar el bloque
                 if (event.key.code == sf::Keyboard::Space) {
                     sf::Sprite newBlock = blockSprite;
                     placedBlocks.push_back(newBlock);
                     blockVelocities.push_back(sf::Vector2f(0.f, 0.f));
                     isBlockLaunched = true;
                 }
-                // Cambiar la textura
                 if (event.key.code == sf::Keyboard::C) {
                     currentTextureIndex++;
                     if (currentTextureIndex >= blockTextures.size()) {
@@ -111,7 +101,6 @@ void Game::processEvents() {
                 }
             }
 
-            // Alternar pantalla completa
             if (event.key.code == sf::Keyboard::P) {
                 if (is_fullscreen) {
                     window->create(sf::VideoMode(1500, 852), "Mi Juego SFML con POO", sf::Style::Default);
@@ -123,7 +112,15 @@ void Game::processEvents() {
                 }
                 window->setMouseCursorVisible(!is_fullscreen);
                 window->setFramerateLimit(60);
+                recalculatePositions();
             }
+        }
+
+        if (event.type == sf::Event::Resized) {
+            sf::FloatRect visibleArea(0, 0, static_cast<float>(event.size.width), static_cast<float>(event.size.height));
+            window->setView(sf::View(visibleArea));
+            recalculatePositions();
+            std::cout << "Tamaño de la ventana: " << window->getSize().x << " x " << window->getSize().y << std::endl;
         }
     }
 }
@@ -133,7 +130,6 @@ void Game::update(sf::Time deltaTime) {
 
     for (size_t i = 0; i < placedBlocks.size(); ++i) {
         blockVelocities[i].y += gravity * deltaTime.asSeconds();
-
         sf::Vector2f currentPos = placedBlocks[i].getPosition();
         sf::Vector2f nextPos = currentPos;
         nextPos.y += blockVelocities[i].y * deltaTime.asSeconds();
@@ -196,18 +192,64 @@ void Game::render() {
 
 void Game::scaleSpriteToWindow(sf::Sprite& sprite, const sf::Texture& texture) {
     float originalWidth = static_cast<float>(texture.getSize().x);
+    float originalHeight = static_cast<float>(texture.getSize().y);
     float windowWidth = static_cast<float>(window->getSize().x);
-    float scale = windowWidth / originalWidth;
-    sprite.setScale(scale, scale);
+    float windowHeight = static_cast<float>(window->getSize().y);
+
+    float scaleX = windowWidth / originalWidth;
+    float scaleY = windowHeight / originalHeight;
+
+    
+    float finalScale = std::max(scaleX, scaleY);
+
+    sprite.setScale(finalScale, finalScale);
 }
 
 void Game::spawnNewBlock() {
-    currentTextureIndex = rand() % blockTextures.size();
-    blockSprite.setTexture(blockTextures[currentTextureIndex]);
-
     float blockWidth = blockSprite.getGlobalBounds().width;
     float posX = columnPositions[currentColumnIndex] - (blockWidth / 2.0f);
     float posY = 50.f;
 
     blockSprite.setPosition(posX, posY);
+}
+
+void Game::recalculatePositions() {
+    
+    scaleSpriteToWindow(backgroundSprite, backgroundTexture);
+
+    
+    const int numColumns = 7;
+    float blockWidth_scale = (static_cast<float>(window->getSize().x) / 1990.0f) * 0.25f;
+    float effectiveBlockWidth = blockTextures[0].getSize().x * blockWidth_scale;
+
+    columnPositions.clear();
+    float totalWidth = window->getSize().x;
+
+    float offset = 150.0f;
+
+    float spacing = (totalWidth - (effectiveBlockWidth * numColumns) - (offset * 2.0f)) / (numColumns - 1);
+
+    for (int i = 0; i < numColumns; ++i) {
+        columnPositions.push_back(offset + (spacing * i) + (effectiveBlockWidth * i));
+    }
+
+    
+    float newWindowWidth = static_cast<float>(window->getSize().x);
+    float newWindowHeight = static_cast<float>(window->getSize().y);
+    float oldWindowWidth = oldWindowSize.x;
+    float oldWindowHeight = oldWindowSize.y;
+
+    if (oldWindowWidth > 0 && oldWindowHeight > 0) {
+        for (auto& block : placedBlocks) {
+            float newPosX = block.getPosition().x * (newWindowWidth / oldWindowWidth);
+            float newPosY = block.getPosition().y * (newWindowHeight / oldWindowHeight);
+            block.setPosition(newPosX, newPosY);
+            block.setScale(blockWidth_scale, blockWidth_scale);
+        }
+    }
+
+    blockSprite.setScale(blockWidth_scale, blockWidth_scale);
+    spawnNewBlock();
+
+    oldWindowSize = static_cast<sf::Vector2f>(window->getSize());
 }

@@ -15,7 +15,8 @@ private:
     void update(sf::Time deltaTime);
     void render();
     void scaleSpriteToWindow(sf::Sprite& sprite, const sf::Texture& texture);
-    void spawnNewBlock(); 
+    void spawnNewBlock();
+    void recalculatePositions();
 
     sf::RenderWindow* window;
     sf::Font font;
@@ -33,10 +34,12 @@ private:
     std::vector<sf::Vector2f> blockVelocities;
     const float gravity;
 
-    
     std::vector<float> columnPositions;
     int currentColumnIndex;
     bool isBlockLaunched;
+
+    // Nueva variable para el control de redimensionamiento
+    sf::Vector2f oldWindowSize;
 };
 
-#endif 
+#endif // GAME_H
