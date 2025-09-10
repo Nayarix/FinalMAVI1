@@ -38,7 +38,7 @@ private:
     int currentColumnIndex;
     bool isBlockLaunched;
 
-    // Nueva variable para el control de redimensionamiento
+  
     sf::Vector2f oldWindowSize;
 };
 
