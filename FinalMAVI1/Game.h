@@ -2,7 +2,7 @@
 #define GAME_H
 
 #include <SFML/Graphics.hpp>
-#include <vector> 
+#include <vector>
 
 class Game {
 public:
@@ -15,7 +15,7 @@ private:
     void update(sf::Time deltaTime);
     void render();
     void scaleSpriteToWindow(sf::Sprite& sprite, const sf::Texture& texture);
-
+    void spawnNewBlock(); 
 
     sf::RenderWindow* window;
     sf::Font font;
@@ -24,18 +24,19 @@ private:
     sf::Sprite backgroundSprite;
     sf::Clock clock;
 
-
-    sf::Sprite cursor;
     sf::Sprite blockSprite;
     std::vector<sf::Texture> blockTextures;
     int currentTextureIndex;
     bool is_fullscreen;
 
     std::vector<sf::Sprite> placedBlocks;
-
     std::vector<sf::Vector2f> blockVelocities;
     const float gravity;
 
+    
+    std::vector<float> columnPositions;
+    int currentColumnIndex;
+    bool isBlockLaunched;
 };
 
-#endif // GAME_H
+#endif 
