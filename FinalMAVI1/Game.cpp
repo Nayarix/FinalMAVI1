@@ -81,10 +81,12 @@ void Game::processEvents() {
                 if (event.key.code == sf::Keyboard::Left) {
                     currentColumnIndex = std::max(0, currentColumnIndex - 1);
                     spawnNewBlock();
+                    std::cout << "Moved to column: " << currentColumnIndex << std::endl;
                 }
                 if (event.key.code == sf::Keyboard::Right) {
                     currentColumnIndex = std::min(static_cast<int>(columnPositions.size()) - 1, currentColumnIndex + 1);
                     spawnNewBlock();
+                    std::cout << "Moved to column: " << currentColumnIndex << std::endl;
                 }
                 if (event.key.code == sf::Keyboard::Space) {
                     sf::Sprite newBlock = blockSprite;
@@ -120,6 +122,12 @@ void Game::processEvents() {
             sf::FloatRect visibleArea(0, 0, static_cast<float>(event.size.width), static_cast<float>(event.size.height));
             window->setView(sf::View(visibleArea));
             recalculatePositions();
+
+            
+            if (!isBlockLaunched) {
+                spawnNewBlock();
+            }
+
             std::cout << "Tamaño de la ventana: " << window->getSize().x << " x " << window->getSize().y << std::endl;
         }
     }
@@ -206,11 +214,24 @@ void Game::scaleSpriteToWindow(sf::Sprite& sprite, const sf::Texture& texture) {
 }
 
 void Game::spawnNewBlock() {
+    
+    if (columnPositions.empty()) {
+        recalculatePositions();
+        return;
+    }
+
+    
+    currentColumnIndex = std::max(0, std::min(currentColumnIndex, static_cast<int>(columnPositions.size()) - 1));
+
     float blockWidth = blockSprite.getGlobalBounds().width;
     float posX = columnPositions[currentColumnIndex] - (blockWidth / 2.0f);
     float posY = 50.f;
 
     blockSprite.setPosition(posX, posY);
+
+    
+    std::cout << "Block spawned at column " << currentColumnIndex
+        << ", position: " << posX << std::endl;
 }
 
 void Game::recalculatePositions() {
@@ -219,37 +240,63 @@ void Game::recalculatePositions() {
 
     
     const int numColumns = 7;
-    float blockWidth_scale = (static_cast<float>(window->getSize().x) / 1990.0f) * 0.25f;
-    float effectiveBlockWidth = blockTextures[0].getSize().x * blockWidth_scale;
+
+    
+    float originalBlockWidth = static_cast<float>(blockTextures[0].getSize().x);
+    float targetBlockWidth = (window->getSize().x / 1990.0f) * (originalBlockWidth * 0.25f);
+    float blockWidth_scale = targetBlockWidth / originalBlockWidth;
 
     columnPositions.clear();
     float totalWidth = window->getSize().x;
 
-    float offset = 150.0f;
+    
+    float effectiveBlockWidth = originalBlockWidth * blockWidth_scale;
 
-    float spacing = (totalWidth - (effectiveBlockWidth * numColumns) - (offset * 2.0f)) / (numColumns - 1);
+    
+    float offset = totalWidth * 0.075f; 
+    float availableWidth = totalWidth - (2 * offset);
+    float spacing = (availableWidth - (effectiveBlockWidth * numColumns)) / (numColumns - 1);
 
     for (int i = 0; i < numColumns; ++i) {
-        columnPositions.push_back(offset + (spacing * i) + (effectiveBlockWidth * i));
+        float position = offset + (i * (effectiveBlockWidth + spacing)) + (effectiveBlockWidth / 2.0f);
+        columnPositions.push_back(position);
     }
 
     
+    if (!isBlockLaunched) {
+        spawnNewBlock();
+    }
+
+   
     float newWindowWidth = static_cast<float>(window->getSize().x);
     float newWindowHeight = static_cast<float>(window->getSize().y);
     float oldWindowWidth = oldWindowSize.x;
     float oldWindowHeight = oldWindowSize.y;
 
     if (oldWindowWidth > 0 && oldWindowHeight > 0) {
-        for (auto& block : placedBlocks) {
-            float newPosX = block.getPosition().x * (newWindowWidth / oldWindowWidth);
-            float newPosY = block.getPosition().y * (newWindowHeight / oldWindowHeight);
-            block.setPosition(newPosX, newPosY);
-            block.setScale(blockWidth_scale, blockWidth_scale);
+        for (size_t i = 0; i < placedBlocks.size(); ++i) {
+            float newPosX = placedBlocks[i].getPosition().x * (newWindowWidth / oldWindowWidth);
+            float newPosY = placedBlocks[i].getPosition().y * (newWindowHeight / oldWindowHeight);
+            placedBlocks[i].setPosition(newPosX, newPosY);
+            placedBlocks[i].setScale(blockWidth_scale, blockWidth_scale);
+
+            
+            blockVelocities[i].y *= (newWindowHeight / oldWindowHeight);
         }
     }
 
+    
     blockSprite.setScale(blockWidth_scale, blockWidth_scale);
+
+    
     spawnNewBlock();
 
     oldWindowSize = static_cast<sf::Vector2f>(window->getSize());
+
+    
+    std::cout << "Column positions after resize: ";
+    for (size_t i = 0; i < columnPositions.size(); ++i) {
+        std::cout << columnPositions[i] << " ";
+    }
+    std::cout << std::endl;
 }

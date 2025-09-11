@@ -42,4 +42,4 @@ private:
     sf::Vector2f oldWindowSize;
 };
 
-#endif // GAME_H
+#endif
