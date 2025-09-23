@@ -4,6 +4,9 @@
 #include <SFML/Graphics.hpp>
 #include <vector>
 
+const int GRID_ROWS = 4;
+const int GRID_COLS = 7;
+
 class Game {
 public:
     Game();
@@ -17,6 +20,10 @@ private:
     void scaleSpriteToWindow(sf::Sprite& sprite, const sf::Texture& texture);
     void spawnNewBlock();
     void recalculatePositions();
+
+    sf::Vector2f getGridPosition(int row, int col);
+
+    std::vector<std::vector<int>> grid;
 
     sf::RenderWindow* window;
     sf::Font font;
@@ -38,8 +45,7 @@ private:
     int currentColumnIndex;
     bool isBlockLaunched;
 
-  
     sf::Vector2f oldWindowSize;
 };
 
-#endif
+#endif 

@@ -1,5 +1,7 @@
 #include "Game.h"
 #include <iostream>
+#include <algorithm>
+#include <random>
 
 using namespace sf;
 
@@ -50,6 +52,8 @@ Game::Game() : gravity(500.f) {
 
     oldWindowSize = static_cast<sf::Vector2f>(window->getSize());
 
+    grid.resize(GRID_ROWS, std::vector<int>(GRID_COLS, 0));
+
     recalculatePositions();
     spawnNewBlock();
 }
@@ -81,18 +85,18 @@ void Game::processEvents() {
                 if (event.key.code == sf::Keyboard::Left) {
                     currentColumnIndex = std::max(0, currentColumnIndex - 1);
                     spawnNewBlock();
-                    std::cout << "Moved to column: " << currentColumnIndex << std::endl;
                 }
                 if (event.key.code == sf::Keyboard::Right) {
-                    currentColumnIndex = std::min(static_cast<int>(columnPositions.size()) - 1, currentColumnIndex + 1);
+                    currentColumnIndex = std::min(GRID_COLS - 1, currentColumnIndex + 1);
                     spawnNewBlock();
-                    std::cout << "Moved to column: " << currentColumnIndex << std::endl;
                 }
                 if (event.key.code == sf::Keyboard::Space) {
-                    sf::Sprite newBlock = blockSprite;
-                    placedBlocks.push_back(newBlock);
-                    blockVelocities.push_back(sf::Vector2f(0.f, 0.f));
-                    isBlockLaunched = true;
+                    if (!isBlockLaunched) {
+                        sf::Sprite newBlock = blockSprite;
+                        placedBlocks.push_back(newBlock);
+                        blockVelocities.push_back(sf::Vector2f(0.f, 0.f));
+                        isBlockLaunched = true;
+                    }
                 }
                 if (event.key.code == sf::Keyboard::C) {
                     currentTextureIndex++;
@@ -122,69 +126,68 @@ void Game::processEvents() {
             sf::FloatRect visibleArea(0, 0, static_cast<float>(event.size.width), static_cast<float>(event.size.height));
             window->setView(sf::View(visibleArea));
             recalculatePositions();
-
-            
-            if (!isBlockLaunched) {
-                spawnNewBlock();
-            }
-
-            std::cout << "Tamaño de la ventana: " << window->getSize().x << " x " << window->getSize().y << std::endl;
         }
     }
 }
 
 void Game::update(sf::Time deltaTime) {
-    bool allBlocksStopped = true;
+    if (!placedBlocks.empty() && isBlockLaunched) {
+        size_t lastBlockIndex = placedBlocks.size() - 1;
+        sf::Vector2f& currentVelocity = blockVelocities[lastBlockIndex];
+        sf::Sprite& currentBlock = placedBlocks[lastBlockIndex];
 
-    for (size_t i = 0; i < placedBlocks.size(); ++i) {
-        blockVelocities[i].y += gravity * deltaTime.asSeconds();
-        sf::Vector2f currentPos = placedBlocks[i].getPosition();
-        sf::Vector2f nextPos = currentPos;
-        nextPos.y += blockVelocities[i].y * deltaTime.asSeconds();
+        currentVelocity.y += gravity * deltaTime.asSeconds();
+        currentBlock.move(currentVelocity * deltaTime.asSeconds());
 
-        sf::FloatRect blockBounds = placedBlocks[i].getGlobalBounds();
-        blockBounds.height *= 0.85f;
-        blockBounds.width *= 0.85f;
+        int col = currentColumnIndex;
+        int targetRow = -1;
 
-        if (nextPos.y + blockBounds.height >= window->getSize().y) {
-            nextPos.y = window->getSize().y - blockBounds.height;
-            blockVelocities[i].y = 0.f;
-        }
-
-        for (size_t j = 0; j < placedBlocks.size(); ++j) {
-            if (i == j) continue;
-
-            sf::FloatRect otherBlockBounds = placedBlocks[j].getGlobalBounds();
-            otherBlockBounds.height *= 0.85f;
-            otherBlockBounds.width *= 0.85f;
-
-            sf::FloatRect nextBounds = blockBounds;
-            nextBounds.top = nextPos.y;
-
-            if (nextBounds.intersects(otherBlockBounds)) {
-                if (blockVelocities[i].y > 0 && currentPos.y < otherBlockBounds.top) {
-                    nextPos.y = otherBlockBounds.top - blockBounds.height;
-                    blockVelocities[i].y = 0.f;
-                }
+        for (int row = GRID_ROWS - 1; row >= 0; --row) {
+            if (grid[row][col] == 0) {
+                targetRow = row;
+                break;
             }
         }
 
-        placedBlocks[i].setPosition(placedBlocks[i].getPosition().x, nextPos.y);
+        if (targetRow != -1) {
+            float targetPosY = getGridPosition(targetRow, col).y;
 
-        if (blockVelocities[i].y > 0.f) {
-            allBlocksStopped = false;
+            if (currentBlock.getPosition().y >= targetPosY) {
+                grid[targetRow][col] = currentTextureIndex + 1;
+
+                placedBlocks.pop_back();
+                blockVelocities.pop_back();
+
+                isBlockLaunched = false;
+                spawnNewBlock();
+            }
         }
-    }
-
-    if (isBlockLaunched && allBlocksStopped) {
-        spawnNewBlock();
-        isBlockLaunched = false;
+        else {
+            placedBlocks.pop_back();
+            blockVelocities.pop_back();
+            isBlockLaunched = false;
+            spawnNewBlock();
+        }
     }
 }
 
 void Game::render() {
     window->clear();
     window->draw(backgroundSprite);
+
+    for (int row = 0; row < GRID_ROWS; ++row) {
+        for (int col = 0; col < GRID_COLS; ++col) {
+            if (grid[row][col] != 0) {
+                int blockType = grid[row][col];
+                sf::Texture& texture = blockTextures[blockType - 1];
+                sf::Sprite block(texture);
+                block.setScale(blockSprite.getScale());
+                block.setPosition(getGridPosition(row, col));
+
+                window->draw(block);
+            }
+        }
+    }
 
     for (const auto& block : placedBlocks) {
         window->draw(block);
@@ -207,96 +210,68 @@ void Game::scaleSpriteToWindow(sf::Sprite& sprite, const sf::Texture& texture) {
     float scaleX = windowWidth / originalWidth;
     float scaleY = windowHeight / originalHeight;
 
-    
     float finalScale = std::max(scaleX, scaleY);
 
     sprite.setScale(finalScale, finalScale);
 }
 
 void Game::spawnNewBlock() {
-    
-    if (columnPositions.empty()) {
-        recalculatePositions();
-        return;
-    }
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<> distrib(0, blockTextures.size() - 1);
 
-    
-    currentColumnIndex = std::max(0, std::min(currentColumnIndex, static_cast<int>(columnPositions.size()) - 1));
+    currentTextureIndex = distrib(gen);
+    blockSprite.setTexture(blockTextures[currentTextureIndex]);
 
     float blockWidth = blockSprite.getGlobalBounds().width;
     float posX = columnPositions[currentColumnIndex] - (blockWidth / 2.0f);
     float posY = 50.f;
 
     blockSprite.setPosition(posX, posY);
-
-    
-    std::cout << "Block spawned at column " << currentColumnIndex
-        << ", position: " << posX << std::endl;
 }
 
 void Game::recalculatePositions() {
-    
     scaleSpriteToWindow(backgroundSprite, backgroundTexture);
 
-    
-    const int numColumns = 7;
-
-    
+    const int numColumns = GRID_COLS;
     float originalBlockWidth = static_cast<float>(blockTextures[0].getSize().x);
     float targetBlockWidth = (window->getSize().x / 1990.0f) * (originalBlockWidth * 0.25f);
     float blockWidth_scale = targetBlockWidth / originalBlockWidth;
 
     columnPositions.clear();
     float totalWidth = window->getSize().x;
-
-    
     float effectiveBlockWidth = originalBlockWidth * blockWidth_scale;
-
-    
-    float offset = totalWidth * 0.075f; 
+    float offset = totalWidth * 0.075f;
     float availableWidth = totalWidth - (2 * offset);
     float spacing = (availableWidth - (effectiveBlockWidth * numColumns)) / (numColumns - 1);
 
     for (int i = 0; i < numColumns; ++i) {
-        float position = offset + (i * (effectiveBlockWidth + spacing)) + (effectiveBlockWidth / 2.0f);
-        columnPositions.push_back(position);
+        float position = offset + (i * (effectiveBlockWidth + spacing));
+        columnPositions.push_back(position + effectiveBlockWidth / 2.0f);
     }
 
-    
-    if (!isBlockLaunched) {
-        spawnNewBlock();
-    }
+    blockSprite.setScale(blockWidth_scale, blockWidth_scale);
+    spawnNewBlock();
 
-   
     float newWindowWidth = static_cast<float>(window->getSize().x);
-    float newWindowHeight = static_cast<float>(window->getSize().y);
     float oldWindowWidth = oldWindowSize.x;
-    float oldWindowHeight = oldWindowSize.y;
-
-    if (oldWindowWidth > 0 && oldWindowHeight > 0) {
-        for (size_t i = 0; i < placedBlocks.size(); ++i) {
-            float newPosX = placedBlocks[i].getPosition().x * (newWindowWidth / oldWindowWidth);
-            float newPosY = placedBlocks[i].getPosition().y * (newWindowHeight / oldWindowHeight);
-            placedBlocks[i].setPosition(newPosX, newPosY);
-            placedBlocks[i].setScale(blockWidth_scale, blockWidth_scale);
-
-            
-            blockVelocities[i].y *= (newWindowHeight / oldWindowHeight);
+    if (oldWindowWidth > 0) {
+        float scaleFactor = newWindowWidth / oldWindowWidth;
+        for (auto& block : placedBlocks) {
+            block.setPosition(block.getPosition().x * scaleFactor, block.getPosition().y);
+            block.setScale(blockWidth_scale, blockWidth_scale);
         }
     }
 
-    
-    blockSprite.setScale(blockWidth_scale, blockWidth_scale);
-
-    
-    spawnNewBlock();
-
     oldWindowSize = static_cast<sf::Vector2f>(window->getSize());
+}
 
-    
-    std::cout << "Column positions after resize: ";
-    for (size_t i = 0; i < columnPositions.size(); ++i) {
-        std::cout << columnPositions[i] << " ";
-    }
-    std::cout << std::endl;
+sf::Vector2f Game::getGridPosition(int row, int col) {
+    float blockHeight = blockTextures[0].getSize().y * blockSprite.getScale().y;
+    float blockWidth = blockTextures[0].getSize().x * blockSprite.getScale().x;
+
+    float posX = columnPositions[col];
+    float posY = window->getSize().y - (blockHeight * (GRID_ROWS - row));
+
+    return sf::Vector2f(posX - blockWidth / 2.0f, posY);
 }
