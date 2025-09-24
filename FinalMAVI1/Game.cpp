@@ -21,15 +21,50 @@ Game::Game() : gravity(500.f) {
     float scale = windowWidth / originalWidth;
     backgroundSprite.setScale(scale, scale);
 
-    sf::Texture Espada, Escudo, Corona;
-    if (!Espada.loadFromFile("BloquesMAVI1/Espada.png") ||
-        !Escudo.loadFromFile("BloquesMAVI1/Escudo.png") ||
-        !Corona.loadFromFile("BloquesMAVI1/Corona.png")) {
-        std::cerr << "Error al cargar las texturas de bloques" << std::endl;
+   
+
+       
+    std::vector<std::string> texturePaths = {
+        "BloquesMAVI1/Espada.png",
+        "BloquesMAVI1/Escudo.png",
+        "BloquesMAVI1/Corona.png",
+        "BloquesMAVI1/AvatarDelReino.png",
+        "BloquesMAVI1/BolaDeCristal.png",
+        "BloquesMAVI1/CaballeroDragon.png",
+        "BloquesMAVI1/CazadorDeDragones.png",
+        "BloquesMAVI1/cetroMagico.png",
+        "BloquesMAVI1/DefensorDelReino.png",
+        "BloquesMAVI1/Dragon.png",
+        "BloquesMAVI1/DragonAncestral.png",
+        "BloquesMAVI1/DragonDeLaCorona.png",
+        "BloquesMAVI1/DragonMagico.png",
+        "BloquesMAVI1/Emblema.png",
+        "BloquesMAVI1/EscamaDeDragon.png",
+        "BloquesMAVI1/EspadaDelCrepusculo.png",
+        "BloquesMAVI1/EspadaEncantada.png",
+        "BloquesMAVI1/GuardianReal.png",
+        "BloquesMAVI1/HechiceroReal.png",
+        "BloquesMAVI1/HeroeLegendario.png",
+        "BloquesMAVI1/Paladin.png",
+        "BloquesMAVI1/ReyDragon.png",
+        "BloquesMAVI1/ReyGuerrero.png",
+        "BloquesMAVI1/SeñorDeLaGuerra.png",
+        "BloquesMAVI1/TitanDeBatalla.png",
+    };
+
+    
+    for (const auto& path : texturePaths) {
+        sf::Texture tempTexture;
+        if (tempTexture.loadFromFile(path)) {
+            
+            blockTextures.push_back(std::move(tempTexture));
+        }
+        else {
+            std::cerr << "Error al cargar la textura: " << path << std::endl;
+        }
     }
-    blockTextures.push_back(Espada);
-    blockTextures.push_back(Escudo);
-    blockTextures.push_back(Corona);
+
+    
 
     currentTextureIndex = 0;
     blockSprite.setTexture(blockTextures[currentTextureIndex]);
