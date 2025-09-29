@@ -21,7 +21,11 @@ private:
     void spawnNewBlock();
     void recalculatePositions();
 
+    void checkAndProcessInteractions(int landedRow, int landedCol);
+    void applyCascadingGravity(int col);
+
     sf::Vector2f getGridPosition(int row, int col);
+
 
     std::vector<std::vector<int>> grid;
 

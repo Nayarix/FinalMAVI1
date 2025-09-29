@@ -28,6 +28,7 @@ Game::Game() : gravity(500.f) {
         "BloquesMAVI1/Espada.png",
         "BloquesMAVI1/Escudo.png",
         "BloquesMAVI1/Corona.png",
+        "BloquesMAVI1/Emblema.png",
         "BloquesMAVI1/AvatarDelReino.png",
         "BloquesMAVI1/BolaDeCristal.png",
         "BloquesMAVI1/CaballeroDragon.png",
@@ -38,7 +39,6 @@ Game::Game() : gravity(500.f) {
         "BloquesMAVI1/DragonAncestral.png",
         "BloquesMAVI1/DragonDeLaCorona.png",
         "BloquesMAVI1/DragonMagico.png",
-        "BloquesMAVI1/Emblema.png",
         "BloquesMAVI1/EscamaDeDragon.png",
         "BloquesMAVI1/EspadaDelCrepusculo.png",
         "BloquesMAVI1/EspadaEncantada.png",
@@ -64,7 +64,10 @@ Game::Game() : gravity(500.f) {
         }
     }
 
-    
+    const int ID_ESPADA = 1;
+    const int ID_ESCUDO = 2;
+	const int ID_CORONA = 3;
+    const int ID_EMBLEMA = 4;
 
     currentTextureIndex = 0;
     blockSprite.setTexture(blockTextures[currentTextureIndex]);
@@ -190,6 +193,8 @@ void Game::update(sf::Time deltaTime) {
             if (currentBlock.getPosition().y >= targetPosY) {
                 grid[targetRow][col] = currentTextureIndex + 1;
 
+                checkAndProcessInteractions(targetRow, col);
+
                 placedBlocks.pop_back();
                 blockVelocities.pop_back();
 
@@ -309,4 +314,99 @@ sf::Vector2f Game::getGridPosition(int row, int col) {
     float posY = window->getSize().y - (blockHeight * (GRID_ROWS - row));
 
     return sf::Vector2f(posX - blockWidth / 2.0f, posY);
+}
+
+void Game::applyCascadingGravity(int col) {
+    int nextOpenRow = GRID_ROWS - 1; 
+
+    for (int row = GRID_ROWS - 1; row >= 0; --row) {
+        if (grid[row][col] != 0) {
+            if (row != nextOpenRow) {
+                grid[nextOpenRow][col] = grid[row][col];
+                grid[row][col] = 0; 
+            }
+            nextOpenRow--;
+        }
+    }
+}
+
+void Game::checkAndProcessInteractions(int landedRow, int landedCol) {
+    const int ID_ESPADA = 1;
+    const int ID_ESCUDO = 2;
+	const int ID_CORONA = 3;
+    const int ID_EMBLEMA = 4;
+
+    int currentBlockType = grid[landedRow][landedCol];
+
+
+    if (landedRow > 0) {
+        int aboveRow = landedRow - 1;
+        int adjacentBlockType = grid[aboveRow][landedCol];
+
+        if ((currentBlockType == ID_ESPADA && adjacentBlockType == ID_ESCUDO) ||
+            (currentBlockType == ID_ESCUDO && adjacentBlockType == ID_ESPADA)) {
+
+            grid[landedRow][landedCol] = ID_EMBLEMA;
+            grid[aboveRow][landedCol] = 0; 
+
+            applyCascadingGravity(landedCol); 
+            return; 
+        }
+    }
+
+
+    if (landedRow < GRID_ROWS - 1) {
+        int belowRow = landedRow + 1;
+        int adjacentBlockType = grid[belowRow][landedCol];
+
+        if ((currentBlockType == ID_ESPADA && adjacentBlockType == ID_ESCUDO) ||
+            (currentBlockType == ID_ESCUDO && adjacentBlockType == ID_ESPADA)) {
+
+            grid[belowRow][landedCol] = ID_EMBLEMA; 
+            grid[landedRow][landedCol] = 0; 
+
+            applyCascadingGravity(landedCol);
+            return;
+        }
+    }
+
+
+
+    if (landedCol > 0) {
+        int leftCol = landedCol - 1;
+        int adjacentBlockType = grid[landedRow][leftCol];
+
+      
+        if ((currentBlockType == ID_ESPADA && adjacentBlockType == ID_ESCUDO) ||
+            (currentBlockType == ID_ESCUDO && adjacentBlockType == ID_ESPADA)) {
+
+            grid[landedRow][leftCol] = ID_EMBLEMA; 
+            grid[landedRow][landedCol] = 0; 
+
+          
+            applyCascadingGravity(landedCol);
+            applyCascadingGravity(leftCol);
+            return;
+        }
+    }
+
+   
+    if (landedCol < GRID_COLS - 1) {
+        int rightCol = landedCol + 1;
+        int adjacentBlockType = grid[landedRow][rightCol];
+
+       
+        if ((currentBlockType == ID_ESPADA && adjacentBlockType == ID_ESCUDO) ||
+            (currentBlockType == ID_ESCUDO && adjacentBlockType == ID_ESPADA)) {
+
+            
+            grid[landedRow][landedCol] = 0; 
+            grid[landedRow][rightCol] = ID_EMBLEMA; 
+
+            
+            applyCascadingGravity(landedCol);
+            applyCascadingGravity(rightCol);
+            return;
+        }
+    }
 }
