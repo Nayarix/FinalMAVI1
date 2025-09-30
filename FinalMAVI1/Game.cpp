@@ -10,7 +10,6 @@ const int ID_ESCUDO = 2;
 const int ID_CORONA = 3;
 const int ID_CETRO = 4;
 const int ID_DRAGON = 5;
-
 const int ID_EMBLEMA = 6;
 const int ID_REYGUERRERO = 7;
 const int ID_ESPADAENCANTADA = 8;
@@ -36,11 +35,43 @@ const int ID_ESPADACREPUSCULO = 25;
 void Game::initializeRules() {
     combinationRules.clear();
 
-
+	//Combinaciones de primer nivel
     combinationRules.push_back({ ID_ESCUDO, ID_ESPADA, ID_EMBLEMA });
     combinationRules.push_back({ ID_ESPADA, ID_ESCUDO, ID_EMBLEMA });
 
+    combinationRules.push_back({ ID_CORONA, ID_ESPADA, ID_REYGUERRERO });
+    combinationRules.push_back({ ID_ESPADA, ID_CORONA, ID_REYGUERRERO });
+
+	combinationRules.push_back({ ID_CETRO, ID_ESPADA, ID_ESPADAENCANTADA });
+    combinationRules.push_back({ ID_ESPADA, ID_CETRO, ID_ESPADAENCANTADA });
+
+	combinationRules.push_back({ ID_DRAGON, ID_ESPADA, ID_CAZADORDEDRAGONES });
+    combinationRules.push_back({ ID_ESPADA, ID_DRAGON, ID_CAZADORDEDRAGONES });
+
+	combinationRules.push_back({ ID_CORONA, ID_ESCUDO, ID_GUARDIANREAL });
+	combinationRules.push_back({ ID_ESCUDO, ID_CORONA, ID_GUARDIANREAL });
+
+	combinationRules.push_back({ ID_CETRO, ID_ESCUDO, ID_BOLADECRISTAL });
+	combinationRules.push_back({ ID_ESCUDO, ID_CETRO, ID_BOLADECRISTAL });
+
+	combinationRules.push_back({ ID_DRAGON, ID_ESCUDO, ID_ESCAMADEDRAGON });
+	combinationRules.push_back({ ID_ESCUDO, ID_DRAGON, ID_ESCAMADEDRAGON });
+
+	combinationRules.push_back({ ID_CETRO, ID_CORONA, ID_HECHICEROREAL });
+	combinationRules.push_back({ ID_CORONA, ID_CETRO, ID_HECHICEROREAL });
+
+	combinationRules.push_back({ ID_DRAGON, ID_CORONA, ID_REYDRAGON });
+	combinationRules.push_back({ ID_CORONA, ID_DRAGON, ID_REYDRAGON });
+
+	combinationRules.push_back({ ID_DRAGON, ID_CETRO, ID_DRAGONMAGICO });
+	combinationRules.push_back({ ID_CETRO, ID_DRAGON, ID_DRAGONMAGICO });
+
+
 }
+
+
+
+
 
 Game::Game() : gravity(500.f) {
     window = new RenderWindow(VideoMode::getDesktopMode(), "Mi Juego SFML con POO", Style::Fullscreen);
