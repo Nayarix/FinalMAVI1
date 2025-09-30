@@ -5,6 +5,21 @@
 
 using namespace sf;
 
+const int ID_ESPADA = 1;
+const int ID_ESCUDO = 2;
+const int ID_CORONA = 3;
+const int ID_EMBLEMA = 4;
+
+
+void Game::initializeRules() {
+    combinationRules.clear();
+
+
+    combinationRules.push_back({ ID_ESCUDO, ID_ESPADA, ID_EMBLEMA });
+    combinationRules.push_back({ ID_ESPADA, ID_ESCUDO, ID_EMBLEMA });
+
+}
+
 Game::Game() : gravity(500.f) {
     window = new RenderWindow(VideoMode::getDesktopMode(), "Mi Juego SFML con POO", Style::Fullscreen);
     window->setFramerateLimit(60);
@@ -64,10 +79,8 @@ Game::Game() : gravity(500.f) {
         }
     }
 
-    const int ID_ESPADA = 1;
-    const int ID_ESCUDO = 2;
-	const int ID_CORONA = 3;
-    const int ID_EMBLEMA = 4;
+    initializeRules();
+
 
     currentTextureIndex = 0;
     blockSprite.setTexture(blockTextures[currentTextureIndex]);
@@ -331,82 +344,52 @@ void Game::applyCascadingGravity(int col) {
 }
 
 void Game::checkAndProcessInteractions(int landedRow, int landedCol) {
-    const int ID_ESPADA = 1;
-    const int ID_ESCUDO = 2;
-	const int ID_CORONA = 3;
-    const int ID_EMBLEMA = 4;
 
     int currentBlockType = grid[landedRow][landedCol];
 
+    std::vector<std::pair<int, int>> neighbors = {
+        {landedRow - 1, landedCol}, 
+        {landedRow + 1, landedCol}, 
+        {landedRow, landedCol - 1}, 
+        {landedRow, landedCol + 1}  
+    };
 
-    if (landedRow > 0) {
-        int aboveRow = landedRow - 1;
-        int adjacentBlockType = grid[aboveRow][landedCol];
+    for (const auto& neighbor : neighbors) {
+        int neighborRow = neighbor.first;
+        int neighborCol = neighbor.second;
 
-        if ((currentBlockType == ID_ESPADA && adjacentBlockType == ID_ESCUDO) ||
-            (currentBlockType == ID_ESCUDO && adjacentBlockType == ID_ESPADA)) {
+        if (neighborRow >= 0 && neighborRow < GRID_ROWS &&
+            neighborCol >= 0 && neighborCol < GRID_COLS) {
 
-            grid[landedRow][landedCol] = ID_EMBLEMA;
-            grid[aboveRow][landedCol] = 0; 
+            int adjacentBlockType = grid[neighborRow][neighborCol];
 
-            applyCascadingGravity(landedCol); 
-            return; 
-        }
-    }
+            if (adjacentBlockType != 0) {
 
+                for (const auto& rule : combinationRules) {
 
-    if (landedRow < GRID_ROWS - 1) {
-        int belowRow = landedRow + 1;
-        int adjacentBlockType = grid[belowRow][landedCol];
-
-        if ((currentBlockType == ID_ESPADA && adjacentBlockType == ID_ESCUDO) ||
-            (currentBlockType == ID_ESCUDO && adjacentBlockType == ID_ESPADA)) {
-
-            grid[belowRow][landedCol] = ID_EMBLEMA; 
-            grid[landedRow][landedCol] = 0; 
-
-            applyCascadingGravity(landedCol);
-            return;
-        }
-    }
+                   
+                    if (rule.BlockTypeA == adjacentBlockType && rule.BlockTypeB == currentBlockType) {
 
 
+                        int resultRow = neighborRow;
+                        int resultCol = neighborCol;
 
-    if (landedCol > 0) {
-        int leftCol = landedCol - 1;
-        int adjacentBlockType = grid[landedRow][leftCol];
+                        
+                        grid[resultRow][resultCol] = rule.ResultBlockType; 
+                        grid[landedRow][landedCol] = 0;                  
 
-      
-        if ((currentBlockType == ID_ESPADA && adjacentBlockType == ID_ESCUDO) ||
-            (currentBlockType == ID_ESCUDO && adjacentBlockType == ID_ESPADA)) {
+                     
+                        applyCascadingGravity(landedCol);
+                        
+                        if (landedCol != neighborCol) {
+                            applyCascadingGravity(neighborCol);
+                        }
 
-            grid[landedRow][leftCol] = ID_EMBLEMA; 
-            grid[landedRow][landedCol] = 0; 
-
-          
-            applyCascadingGravity(landedCol);
-            applyCascadingGravity(leftCol);
-            return;
-        }
-    }
-
-   
-    if (landedCol < GRID_COLS - 1) {
-        int rightCol = landedCol + 1;
-        int adjacentBlockType = grid[landedRow][rightCol];
-
-       
-        if ((currentBlockType == ID_ESPADA && adjacentBlockType == ID_ESCUDO) ||
-            (currentBlockType == ID_ESCUDO && adjacentBlockType == ID_ESPADA)) {
-
-            
-            grid[landedRow][landedCol] = 0; 
-            grid[landedRow][rightCol] = ID_EMBLEMA; 
-
-            
-            applyCascadingGravity(landedCol);
-            applyCascadingGravity(rightCol);
-            return;
+                        
+                        return;
+                    }
+                }
+            }
         }
     }
 }

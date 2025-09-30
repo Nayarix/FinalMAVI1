@@ -7,6 +7,13 @@
 const int GRID_ROWS = 4;
 const int GRID_COLS = 7;
 
+
+struct CombinationRule {
+    int BlockTypeA;      
+    int BlockTypeB;      
+    int ResultBlockType; 
+};
+
 class Game {
 public:
     Game();
@@ -20,13 +27,13 @@ private:
     void scaleSpriteToWindow(sf::Sprite& sprite, const sf::Texture& texture);
     void spawnNewBlock();
     void recalculatePositions();
-
+    void initializeRules();
     void checkAndProcessInteractions(int landedRow, int landedCol);
     void applyCascadingGravity(int col);
 
     sf::Vector2f getGridPosition(int row, int col);
 
-
+    std::vector<CombinationRule> combinationRules;
     std::vector<std::vector<int>> grid;
 
     sf::RenderWindow* window;
