@@ -8,7 +8,29 @@ using namespace sf;
 const int ID_ESPADA = 1;
 const int ID_ESCUDO = 2;
 const int ID_CORONA = 3;
-const int ID_EMBLEMA = 4;
+const int ID_CETRO = 4;
+const int ID_DRAGON = 5;
+
+const int ID_EMBLEMA = 6;
+const int ID_REYGUERRERO = 7;
+const int ID_ESPADAENCANTADA = 8;
+const int ID_CAZADORDEDRAGONES = 9;
+const int ID_GUARDIANREAL = 10;
+const int ID_BOLADECRISTAL = 11;
+const int ID_ESCAMADEDRAGON = 12;
+const int ID_HECHICEROREAL = 13;
+const int ID_REYDRAGON = 14;
+const int ID_DRAGONMAGICO = 15;
+const int ID_PALADIN = 16;
+const int ID_HEROELEGENDARIO = 17;
+const int ID_DEFENSORDELREINO = 18;
+const int ID_DRAGONDELACORONA = 19;
+const int ID_SEÑORDELAGUERRA = 20;
+const int ID_AVATARDELREINO = 21;
+const int ID_DRAGONANCESTRAL = 22;
+const int ID_TITANDEBATALLA = 23;
+const int ID_CABALLERODRAGON = 24;
+const int ID_ESPADACREPUSCULO = 25;
 
 
 void Game::initializeRules() {
@@ -40,31 +62,38 @@ Game::Game() : gravity(500.f) {
 
        
     std::vector<std::string> texturePaths = {
+        //Bloques de primer nivel
         "BloquesMAVI1/Espada.png",
         "BloquesMAVI1/Escudo.png",
         "BloquesMAVI1/Corona.png",
-        "BloquesMAVI1/Emblema.png",
-        "BloquesMAVI1/AvatarDelReino.png",
-        "BloquesMAVI1/BolaDeCristal.png",
-        "BloquesMAVI1/CaballeroDragon.png",
-        "BloquesMAVI1/CazadorDeDragones.png",
         "BloquesMAVI1/cetroMagico.png",
-        "BloquesMAVI1/DefensorDelReino.png",
         "BloquesMAVI1/Dragon.png",
-        "BloquesMAVI1/DragonAncestral.png",
-        "BloquesMAVI1/DragonDeLaCorona.png",
-        "BloquesMAVI1/DragonMagico.png",
-        "BloquesMAVI1/EscamaDeDragon.png",
-        "BloquesMAVI1/EspadaDelCrepusculo.png",
-        "BloquesMAVI1/EspadaEncantada.png",
-        "BloquesMAVI1/GuardianReal.png",
-        "BloquesMAVI1/HechiceroReal.png",
-        "BloquesMAVI1/HeroeLegendario.png",
-        "BloquesMAVI1/Paladin.png",
-        "BloquesMAVI1/ReyDragon.png",
+
+        //Bloques de segundo nivel
+        "BloquesMAVI1/Emblema.png",
         "BloquesMAVI1/ReyGuerrero.png",
+        "BloquesMAVI1/EspadaEncantada.png",
+        "BloquesMAVI1/CazadorDeDragones.png",
+        "BloquesMAVI1/GuardianReal.png",
+        "BloquesMAVI1/BolaDeCristal.png",
+        "BloquesMAVI1/EscamaDeDragon.png",
+        "BloquesMAVI1/HechiceroReal.png",
+        "BloquesMAVI1/ReyDragon.png",
+        "BloquesMAVI1/DragonMagico.png",
+
+		//Bloques de tercer nivel
+        "BloquesMAVI1/Paladin.png",
+        "BloquesMAVI1/HeroeLegendario.png",
+        "BloquesMAVI1/DefensorDelReino.png",
+        "BloquesMAVI1/DragonDeLaCorona.png",
         "BloquesMAVI1/SeñorDeLaGuerra.png",
-        "BloquesMAVI1/TitanDeBatalla.png",
+
+		//Bloques de cuarto nivel
+        "BloquesMAVI1/AvatarDelReino.png",
+        "BloquesMAVI1/DragonAncestral.png",
+         "BloquesMAVI1/TitanDeBatalla.png",
+        "BloquesMAVI1/CaballeroDragon.png",
+        "BloquesMAVI1/EspadaDelCrepusculo.png",
     };
 
     
