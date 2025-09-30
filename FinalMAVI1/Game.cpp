@@ -66,7 +66,25 @@ void Game::initializeRules() {
 	combinationRules.push_back({ ID_DRAGON, ID_CETRO, ID_DRAGONMAGICO });
 	combinationRules.push_back({ ID_CETRO, ID_DRAGON, ID_DRAGONMAGICO });
 
+    //Combinaciones de segundo nivel
+    combinationRules.push_back({ ID_EMBLEMA, ID_HECHICEROREAL, ID_PALADIN });
+	combinationRules.push_back({ ID_HECHICEROREAL, ID_EMBLEMA, ID_PALADIN });
 
+	combinationRules.push_back({ ID_ESPADAENCANTADA, ID_REYDRAGON, ID_HEROELEGENDARIO });
+	combinationRules.push_back({ ID_REYDRAGON, ID_ESPADAENCANTADA, ID_HEROELEGENDARIO });
+
+	combinationRules.push_back({ ID_CAZADORDEDRAGONES, ID_BOLADECRISTAL, ID_DEFENSORDELREINO });
+	combinationRules.push_back({ ID_BOLADECRISTAL, ID_CAZADORDEDRAGONES, ID_DEFENSORDELREINO });
+
+	combinationRules.push_back({ ID_GUARDIANREAL, ID_DRAGONMAGICO, ID_DRAGONDELACORONA });
+	combinationRules.push_back({ ID_DRAGONMAGICO, ID_GUARDIANREAL, ID_DRAGONDELACORONA });
+
+	combinationRules.push_back({ ID_REYGUERRERO, ID_ESCAMADEDRAGON, ID_SEÑORDELAGUERRA });
+    combinationRules.push_back({ ID_ESCAMADEDRAGON, ID_REYGUERRERO, ID_SEÑORDELAGUERRA });
+    
+   
+
+    
 }
 
 
