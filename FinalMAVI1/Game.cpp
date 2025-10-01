@@ -82,7 +82,14 @@ void Game::initializeRules() {
 	combinationRules.push_back({ ID_REYGUERRERO, ID_ESCAMADEDRAGON, ID_SEÑORDELAGUERRA });
     combinationRules.push_back({ ID_ESCAMADEDRAGON, ID_REYGUERRERO, ID_SEÑORDELAGUERRA });
     
-   
+	//Combinaciones de tercer nivel
+    tripleCombinationRules.push_back({ ID_PALADIN, ID_HEROELEGENDARIO, ID_DEFENSORDELREINO, ID_AVATARDELREINO });
+    tripleCombinationRules.push_back({ ID_DEFENSORDELREINO, ID_HEROELEGENDARIO, ID_PALADIN, ID_AVATARDELREINO });
+	tripleCombinationRules.push_back({ ID_HEROELEGENDARIO, ID_PALADIN, ID_DEFENSORDELREINO, ID_AVATARDELREINO });
+    tripleCombinationRules.push_back({ ID_PALADIN, ID_DEFENSORDELREINO, ID_HEROELEGENDARIO, ID_AVATARDELREINO });
+    tripleCombinationRules.push_back({ ID_HEROELEGENDARIO, ID_DEFENSORDELREINO, ID_PALADIN, ID_AVATARDELREINO });
+    tripleCombinationRules.push_back({ ID_DEFENSORDELREINO, ID_PALADIN, ID_HEROELEGENDARIO, ID_AVATARDELREINO });
+
 
     
 }
@@ -469,5 +476,54 @@ void Game::checkAndProcessInteractions(int landedRow, int landedCol) {
                 }
             }
         }
+    }
+    checkTripleInteractions(landedRow, landedCol);
+}
+
+void Game::checkTripleInteractions(int landedRow, int landedCol) {
+
+    int blockA = 0, blockB = 0, blockC = 0;
+
+
+    auto checkSequence = [&](int rA, int cA, int rB, int cB, int rC, int cC) {
+        if (grid[rA][cA] == 0 || grid[rB][cB] == 0 || grid[rC][cC] == 0) return false;
+
+
+        blockA = grid[rA][cA];
+        blockB = grid[rB][cB];
+        blockC = grid[rC][cC];
+
+        for (const auto& rule : tripleCombinationRules) {
+         
+            if (rule.BlockTypeA == blockA && rule.BlockTypeB == blockB && rule.BlockTypeC == blockC) {
+
+              
+                grid[rA][cA] = 0;
+                grid[rC][cC] = 0;
+                grid[rB][cB] = rule.ResultBlockType;
+
+               
+                applyCascadingGravity(cA);
+                if (cA != cB) applyCascadingGravity(cB);
+                if (cA != cC && cB != cC) applyCascadingGravity(cC);
+
+                return true;
+            }
+        }
+        return false;
+        };
+
+
+  
+    for (int col = 0; col <= GRID_COLS - 3; ++col) {
+     
+        if (checkSequence(landedRow, col, landedRow, col + 1, landedRow, col + 2)) return;
+    }
+
+
+    if (landedRow <= GRID_ROWS - 3) {
+        int col = landedCol;
+       
+        if (checkSequence(landedRow, col, landedRow + 1, col, landedRow + 2, col)) return;
     }
 }

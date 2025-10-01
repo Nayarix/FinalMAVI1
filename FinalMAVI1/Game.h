@@ -14,6 +14,14 @@ struct CombinationRule {
     int ResultBlockType; 
 };
 
+struct TripleCombinationRule {
+    int BlockTypeA;      
+    int BlockTypeB;     
+    int BlockTypeC;      
+    int ResultBlockType; 
+};
+
+
 class Game {
 public:
     Game();
@@ -29,12 +37,19 @@ private:
     void recalculatePositions();
     void initializeRules();
     void checkAndProcessInteractions(int landedRow, int landedCol);
+    void checkTripleInteractions(int landedRow, int landedCol);
     void applyCascadingGravity(int col);
+    
+    std::vector<CombinationRule> combinationRules;
+    std::vector<TripleCombinationRule> tripleCombinationRules;
+   
+
 
     sf::Vector2f getGridPosition(int row, int col);
-
-    std::vector<CombinationRule> combinationRules;
     std::vector<std::vector<int>> grid;
+
+  
+
 
     sf::RenderWindow* window;
     sf::Font font;
