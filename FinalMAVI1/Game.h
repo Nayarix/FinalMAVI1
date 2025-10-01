@@ -21,6 +21,15 @@ struct TripleCombinationRule {
     int ResultBlockType; 
 };
 
+struct FallingBlock {
+    sf::Sprite sprite;
+    float targetY;
+    float velocity;
+    int col;
+    int targetRow;
+    int blockID;
+};
+
 
 class Game {
 public:
@@ -40,16 +49,15 @@ private:
     void checkTripleInteractions(int landedRow, int landedCol);
     void applyCascadingGravity(int col);
     
+    const float MRU_FALL_SPEED = 800.0f;
+
     std::vector<CombinationRule> combinationRules;
     std::vector<TripleCombinationRule> tripleCombinationRules;
-   
-
-
+    std::vector<FallingBlock> cascadingBlocks;
     sf::Vector2f getGridPosition(int row, int col);
     std::vector<std::vector<int>> grid;
 
-  
-
+ 
 
     sf::RenderWindow* window;
     sf::Font font;

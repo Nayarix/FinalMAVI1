@@ -90,8 +90,33 @@ void Game::initializeRules() {
     tripleCombinationRules.push_back({ ID_HEROELEGENDARIO, ID_DEFENSORDELREINO, ID_PALADIN, ID_AVATARDELREINO });
     tripleCombinationRules.push_back({ ID_DEFENSORDELREINO, ID_PALADIN, ID_HEROELEGENDARIO, ID_AVATARDELREINO });
 
+	tripleCombinationRules.push_back({ ID_DRAGONDELACORONA, ID_SEÑORDELAGUERRA, ID_DRAGONMAGICO, ID_DRAGONANCESTRAL });
+	tripleCombinationRules.push_back({ ID_DRAGONMAGICO, ID_SEÑORDELAGUERRA, ID_DRAGONDELACORONA, ID_DRAGONANCESTRAL });
+	tripleCombinationRules.push_back({ ID_SEÑORDELAGUERRA, ID_DRAGONDELACORONA, ID_DRAGONMAGICO, ID_DRAGONANCESTRAL });
+	tripleCombinationRules.push_back({ ID_DRAGONDELACORONA, ID_DRAGONMAGICO, ID_SEÑORDELAGUERRA, ID_DRAGONANCESTRAL });
+	tripleCombinationRules.push_back({ ID_SEÑORDELAGUERRA, ID_DRAGONMAGICO, ID_DRAGONDELACORONA, ID_DRAGONANCESTRAL });
+	tripleCombinationRules.push_back({ ID_DRAGONMAGICO, ID_DRAGONDELACORONA, ID_SEÑORDELAGUERRA, ID_DRAGONANCESTRAL });
 
-    
+	tripleCombinationRules.push_back({ ID_DEFENSORDELREINO, ID_SEÑORDELAGUERRA, ID_HEROELEGENDARIO, ID_TITANDEBATALLA });
+	tripleCombinationRules.push_back({ ID_HEROELEGENDARIO, ID_SEÑORDELAGUERRA, ID_DEFENSORDELREINO, ID_TITANDEBATALLA });
+	tripleCombinationRules.push_back({ ID_SEÑORDELAGUERRA, ID_DEFENSORDELREINO, ID_HEROELEGENDARIO, ID_TITANDEBATALLA });
+	tripleCombinationRules.push_back({ ID_DEFENSORDELREINO, ID_HEROELEGENDARIO, ID_SEÑORDELAGUERRA, ID_TITANDEBATALLA });
+	tripleCombinationRules.push_back({ ID_SEÑORDELAGUERRA, ID_HEROELEGENDARIO, ID_DEFENSORDELREINO, ID_TITANDEBATALLA });
+	tripleCombinationRules.push_back({ ID_HEROELEGENDARIO, ID_DEFENSORDELREINO, ID_SEÑORDELAGUERRA, ID_TITANDEBATALLA });
+
+	tripleCombinationRules.push_back({ ID_PALADIN, ID_DRAGONDELACORONA, ID_DRAGONMAGICO, ID_CABALLERODRAGON });
+	tripleCombinationRules.push_back({ ID_DRAGONMAGICO, ID_DRAGONDELACORONA, ID_PALADIN, ID_CABALLERODRAGON });
+	tripleCombinationRules.push_back({ ID_DRAGONDELACORONA, ID_PALADIN, ID_DRAGONMAGICO, ID_CABALLERODRAGON });
+	tripleCombinationRules.push_back({ ID_PALADIN, ID_DRAGONMAGICO, ID_DRAGONDELACORONA, ID_CABALLERODRAGON });
+	tripleCombinationRules.push_back({ ID_DRAGONMAGICO, ID_PALADIN, ID_DRAGONDELACORONA, ID_CABALLERODRAGON });
+	tripleCombinationRules.push_back({ ID_DRAGONDELACORONA, ID_DRAGONMAGICO, ID_PALADIN, ID_CABALLERODRAGON });
+
+	tripleCombinationRules.push_back({ ID_HEROELEGENDARIO, ID_DRAGONMAGICO, ID_PALADIN, ID_ESPADACREPUSCULO });
+	tripleCombinationRules.push_back({ ID_PALADIN, ID_DRAGONMAGICO, ID_HEROELEGENDARIO, ID_ESPADACREPUSCULO });
+	tripleCombinationRules.push_back({ ID_HEROELEGENDARIO, ID_PALADIN, ID_DRAGONMAGICO, ID_ESPADACREPUSCULO });
+	tripleCombinationRules.push_back({ ID_DRAGONMAGICO, ID_HEROELEGENDARIO, ID_PALADIN, ID_ESPADACREPUSCULO });
+	tripleCombinationRules.push_back({ ID_PALADIN, ID_HEROELEGENDARIO, ID_DRAGONMAGICO, ID_ESPADACREPUSCULO });
+	tripleCombinationRules.push_back({ ID_DRAGONMAGICO, ID_PALADIN, ID_HEROELEGENDARIO, ID_ESPADACREPUSCULO });
 }
 
 
@@ -218,20 +243,25 @@ void Game::processEvents() {
 
         if (event.type == sf::Event::KeyPressed) {
             if (!isBlockLaunched) {
-                if (event.key.code == sf::Keyboard::Left) {
-                    currentColumnIndex = std::max(0, currentColumnIndex - 1);
-                    spawnNewBlock();
-                }
-                if (event.key.code == sf::Keyboard::Right) {
-                    currentColumnIndex = std::min(GRID_COLS - 1, currentColumnIndex + 1);
-                    spawnNewBlock();
-                }
-                if (event.key.code == sf::Keyboard::Space) {
-                    if (!isBlockLaunched) {
-                        sf::Sprite newBlock = blockSprite;
-                        placedBlocks.push_back(newBlock);
-                        blockVelocities.push_back(sf::Vector2f(0.f, 0.f));
-                        isBlockLaunched = true;
+                if (!isBlockLaunched && cascadingBlocks.empty()) {
+                    if (event.key.code == sf::Keyboard::Left) {
+                        currentColumnIndex = std::max(0, currentColumnIndex - 1);
+                        spawnNewBlock();
+                    }
+                    if (event.key.code == sf::Keyboard::Right) {
+                        currentColumnIndex = std::min(GRID_COLS - 1, currentColumnIndex + 1);
+                        spawnNewBlock();
+                    }
+
+                    if (event.key.code == sf::Keyboard::Space) {
+                        if (!isBlockLaunched && cascadingBlocks.empty()) {
+                            if (!isBlockLaunched) {
+                                sf::Sprite newBlock = blockSprite;
+                                placedBlocks.push_back(newBlock);
+                                blockVelocities.push_back(sf::Vector2f(0.f, 0.f));
+                                isBlockLaunched = true;
+                            }
+                        }
                     }
                 }
                 if (event.key.code == sf::Keyboard::C) {
@@ -267,7 +297,8 @@ void Game::processEvents() {
 }
 
 void Game::update(sf::Time deltaTime) {
-    if (!placedBlocks.empty() && isBlockLaunched) {
+
+    if (!placedBlocks.empty() && isBlockLaunched && cascadingBlocks.empty()) {
         size_t lastBlockIndex = placedBlocks.size() - 1;
         sf::Vector2f& currentVelocity = blockVelocities[lastBlockIndex];
         sf::Sprite& currentBlock = placedBlocks[lastBlockIndex];
@@ -307,6 +338,30 @@ void Game::update(sf::Time deltaTime) {
             spawnNewBlock();
         }
     }
+    if (!cascadingBlocks.empty()) {
+        std::vector<FallingBlock> nextCascadingBlocks;
+
+        for (FallingBlock& fBlock : cascadingBlocks) {
+            float distanceToTravel = fBlock.velocity * deltaTime.asSeconds();
+            float currentY = fBlock.sprite.getPosition().y;
+
+            if (currentY + distanceToTravel >= fBlock.targetY) {
+
+                fBlock.sprite.setPosition(fBlock.sprite.getPosition().x, fBlock.targetY);
+
+                grid[fBlock.targetRow][fBlock.col] = fBlock.blockID;
+
+                checkAndProcessInteractions(fBlock.targetRow, fBlock.col);
+
+            }
+            else {
+                fBlock.sprite.move(0.f, distanceToTravel);
+                nextCascadingBlocks.push_back(fBlock);
+            }
+        }
+
+        cascadingBlocks = std::move(nextCascadingBlocks);
+    }
 }
 
 void Game::render() {
@@ -327,11 +382,15 @@ void Game::render() {
         }
     }
 
+    for (const auto& fBlock : cascadingBlocks) {
+        window->draw(fBlock.sprite);
+    }
     for (const auto& block : placedBlocks) {
         window->draw(block);
     }
 
-    if (!isBlockLaunched) {
+
+    if (!isBlockLaunched && cascadingBlocks.empty()) {
         window->draw(blockSprite);
     }
 
@@ -415,16 +474,41 @@ sf::Vector2f Game::getGridPosition(int row, int col) {
 }
 
 void Game::applyCascadingGravity(int col) {
-    int nextOpenRow = GRID_ROWS - 1; 
+    int nextOpenRow = GRID_ROWS - 1;
+    std::vector<FallingBlock> blocksToFall;
 
     for (int row = GRID_ROWS - 1; row >= 0; --row) {
         if (grid[row][col] != 0) {
             if (row != nextOpenRow) {
-                grid[nextOpenRow][col] = grid[row][col];
-                grid[row][col] = 0; 
+               
+
+                sf::Vector2f startPos = getGridPosition(row, col);
+                sf::Vector2f targetPos = getGridPosition(nextOpenRow, col);
+
+                FallingBlock fBlock;
+                fBlock.col = col;
+                fBlock.targetRow = nextOpenRow;
+                fBlock.velocity = MRU_FALL_SPEED;
+                fBlock.targetY = targetPos.y;
+                fBlock.blockID = grid[row][col]; 
+
+                
+                fBlock.sprite.setTexture(blockTextures[fBlock.blockID - 1]);
+                fBlock.sprite.setScale(blockSprite.getScale());
+                fBlock.sprite.setPosition(startPos.x, startPos.y);
+
+                blocksToFall.push_back(fBlock);
+
+                
+                grid[row][col] = 0;
             }
             nextOpenRow--;
         }
+    }
+
+    
+    if (!blocksToFall.empty()) {
+        cascadingBlocks.insert(cascadingBlocks.end(), blocksToFall.begin(), blocksToFall.end());
     }
 }
 
