@@ -126,7 +126,7 @@ void Game::initializeRules() {
 Game::Game() : gravity(500.f) {
     window = new RenderWindow(VideoMode::getDesktopMode(), "Mi Juego SFML con POO", Style::Fullscreen);
     window->setFramerateLimit(60);
-    window->setMouseCursorVisible(false);
+    //window->setMouseCursorVisible(false);
     is_fullscreen = true;
 
     if (!backgroundTexture.loadFromFile("BloquesMAVI1/fondoPrueba2.jpg")) {
@@ -210,6 +210,7 @@ Game::Game() : gravity(500.f) {
 
     currentColumnIndex = 3;
     isBlockLaunched = false;
+    is_game_started = false;
 
     oldWindowSize = static_cast<sf::Vector2f>(window->getSize());
 
@@ -224,75 +225,61 @@ Game::~Game() {
     window = nullptr;
 }
 
-void Game::run() {
-    sf::Clock frameClock;
-    while (window->isOpen()) {
-        sf::Time deltaTime = frameClock.restart();
-        processEvents();
-        update(deltaTime);
-        render();
-    }
-}
 
-void Game::processEvents() {
-    sf::Event event;
-    while (window->pollEvent(event)) {
-        if (event.type == sf::Event::Closed) {
-            window->close();
-        }
 
-        if (event.type == sf::Event::KeyPressed) {
-            if (!isBlockLaunched) {
-                if (!isBlockLaunched && cascadingBlocks.empty()) {
-                    if (event.key.code == sf::Keyboard::Left) {
-                        currentColumnIndex = std::max(0, currentColumnIndex - 1);
-                        spawnNewBlock();
-                    }
-                    if (event.key.code == sf::Keyboard::Right) {
-                        currentColumnIndex = std::min(GRID_COLS - 1, currentColumnIndex + 1);
-                        spawnNewBlock();
-                    }
+void Game::processEvents(sf::Event& event) {
+    if (event.type == sf::Event::KeyPressed) {
 
-                    if (event.key.code == sf::Keyboard::Space) {
-                        if (!isBlockLaunched && cascadingBlocks.empty()) {
-                            if (!isBlockLaunched) {
-                                sf::Sprite newBlock = blockSprite;
-                                placedBlocks.push_back(newBlock);
-                                blockVelocities.push_back(sf::Vector2f(0.f, 0.f));
-                                isBlockLaunched = true;
-                            }
-                        }
-                    }
-                }
-                if (event.key.code == sf::Keyboard::C) {
-                    currentTextureIndex++;
-                    if (currentTextureIndex >= blockTextures.size()) {
-                        currentTextureIndex = 0;
-                    }
-                    blockSprite.setTexture(blockTextures[currentTextureIndex]);
-                }
+
+        if (!isBlockLaunched && cascadingBlocks.empty()) {
+            if (event.key.code == sf::Keyboard::Left) {
+                currentColumnIndex = std::max(0, currentColumnIndex - 1);
+                spawnNewBlock();
+            }
+            if (event.key.code == sf::Keyboard::Right) {
+                currentColumnIndex = std::min(GRID_COLS - 1, currentColumnIndex + 1);
+                spawnNewBlock();
             }
 
-            if (event.key.code == sf::Keyboard::P) {
-                if (is_fullscreen) {
-                    window->create(sf::VideoMode(1500, 852), "Mi Juego SFML con POO", sf::Style::Default);
-                    is_fullscreen = false;
+            if (event.key.code == sf::Keyboard::Space) {
+                sf::Sprite newBlock = blockSprite;
+                placedBlocks.push_back(newBlock);
+                blockVelocities.push_back(sf::Vector2f(0.f, 0.f));
+                isBlockLaunched = true;
+                is_game_started = true;
+            }
+
+           
+            if (event.key.code == sf::Keyboard::C) {
+                currentTextureIndex++;
+                if (currentTextureIndex >= blockTextures.size()) {
+                    currentTextureIndex = 0;
                 }
-                else {
-                    window->create(sf::VideoMode::getDesktopMode(), "Mi Juego SFML con POO", sf::Style::Fullscreen);
-                    is_fullscreen = true;
-                }
-                window->setMouseCursorVisible(!is_fullscreen);
-                window->setFramerateLimit(60);
-                recalculatePositions();
+                blockSprite.setTexture(blockTextures[currentTextureIndex]);
             }
         }
 
-        if (event.type == sf::Event::Resized) {
-            sf::FloatRect visibleArea(0, 0, static_cast<float>(event.size.width), static_cast<float>(event.size.height));
-            window->setView(sf::View(visibleArea));
+       
+        if (event.key.code == sf::Keyboard::P) {
+            if (is_fullscreen) {
+                window->create(sf::VideoMode(1500, 852), "Mi Juego SFML con POO", sf::Style::Default);
+                is_fullscreen = false;
+            }
+            else {
+                window->create(sf::VideoMode::getDesktopMode(), "Mi Juego SFML con POO", sf::Style::Fullscreen);
+                is_fullscreen = true;
+            }
+            window->setMouseCursorVisible(!is_fullscreen);
+            window->setFramerateLimit(60);
             recalculatePositions();
         }
+    }
+
+   
+    if (event.type == sf::Event::Resized) {
+        sf::FloatRect visibleArea(0, 0, static_cast<float>(event.size.width), static_cast<float>(event.size.height));
+        window->setView(sf::View(visibleArea));
+        recalculatePositions();
     }
 }
 
@@ -610,4 +597,21 @@ void Game::checkTripleInteractions(int landedRow, int landedCol) {
        
         if (checkSequence(landedRow, col, landedRow + 1, col, landedRow + 2, col)) return;
     }
+}
+
+
+void Game::resetGame() {
+    grid.assign(GRID_ROWS, std::vector<int>(GRID_COLS, 0));
+    placedBlocks.clear();
+    blockVelocities.clear();
+    cascadingBlocks.clear(); 
+    isBlockLaunched = false;
+    currentColumnIndex = 3;
+    is_game_started = true; 
+    spawnNewBlock();
+}
+
+void Game::renderBackground() {
+    window->clear();
+    window->draw(backgroundSprite);
 }
