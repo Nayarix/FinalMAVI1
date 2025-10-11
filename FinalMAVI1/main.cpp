@@ -4,14 +4,14 @@
 
 enum GameState {
     MENU,
-    PLAYING
+    PLAYING,
+    TUTORIAL
 };
 
 void createButton(const std::string& textStr, float yPos, sf::Text& text, sf::RectangleShape& rect, const sf::Font& font, sf::RenderWindow* window, bool isContinuing) {
     text.setFont(font);
     text.setCharacterSize(40);
     text.setString(textStr);
-
     text.setFillColor(isContinuing ? sf::Color(255, 200, 0) : sf::Color::White);
 
     sf::FloatRect textBounds = text.getLocalBounds();
@@ -20,7 +20,7 @@ void createButton(const std::string& textStr, float yPos, sf::Text& text, sf::Re
     text.setPosition(windowWidth / 2.0f, yPos);
 
     rect.setSize(sf::Vector2f(300, 60));
-    rect.setFillColor(sf::Color(0, 0, 0, 180)); 
+    rect.setFillColor(sf::Color(0, 0, 0, 180));
     rect.setOrigin(150.f, 30.f);
     rect.setPosition(windowWidth / 2.0f, yPos);
 }
@@ -30,9 +30,15 @@ int main() {
     Game game;
     GameState currentState = MENU;
     sf::RenderWindow* window = game.getWindow();
+    GameState stateBeforeTutorial = MENU;
+    float tutorialScrollY = 0.f;
     window->setMouseCursorVisible(true);
+
     
+    std::vector<std::string> tutorialRules = game.getRulesForDisplay();
+
     sf::Font font;
+
     if (!font.loadFromFile("arial.ttf")) {
         std::cerr << "Error al cargar la fuente arial.ttf" << std::endl;
         return -1;
@@ -51,18 +57,45 @@ int main() {
                 window->close();
             }
 
+            if (currentState == TUTORIAL) {
+                if (event.type == sf::Event::MouseWheelScrolled) {
+
+                    tutorialScrollY += event.mouseWheelScroll.delta * 30.0f;
+                }
+            }
+
+            if (event.type == sf::Event::MouseButtonReleased && event.mouseButton.button == sf::Mouse::Left) {
+                sf::Vector2f mousePos = (sf::Vector2f)sf::Mouse::getPosition(*window);
+
+                
+                if (game.getTutorialButtonBounds().contains(mousePos) && currentState != TUTORIAL) {
+                    stateBeforeTutorial = currentState;
+                    currentState = TUTORIAL;
+                    window->setMouseCursorVisible(true);
+                }
+            }
+
             if (currentState == PLAYING) {
                 if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Escape) {
-                    currentState = MENU; 
+                    currentState = MENU;
                     window->setMouseCursorVisible(true);
                 }
                 else {
-                    game.processEvents(event); 
+                    game.processEvents(event);
+                }
+            }
+
+            if (currentState == TUTORIAL) {
+                if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Escape) {
+                    currentState = stateBeforeTutorial;
+                    if (currentState == PLAYING) {
+                        
+                    }
                 }
             }
 
             if (currentState == MENU) {
-                
+               
                 if (event.type == sf::Event::MouseButtonReleased && event.mouseButton.button == sf::Mouse::Left) {
                     sf::Vector2f mousePos = (sf::Vector2f)sf::Mouse::getPosition(*window);
 
@@ -71,12 +104,12 @@ int main() {
                             game.resetGame();
                         }
                         currentState = PLAYING;
-                        window->setMouseCursorVisible(false);
+                        
                     }
                     else if (newGameRect.getGlobalBounds().contains(mousePos)) {
-                        game.resetGame(); 
+                        game.resetGame();
                         currentState = PLAYING;
-                        window->setMouseCursorVisible(false);
+                        
                     }
                     else if (exitRect.getGlobalBounds().contains(mousePos)) {
                         window->close();
@@ -84,43 +117,118 @@ int main() {
                 }
             }
 
-        
             if (event.type == sf::Event::Resized) {
                 sf::FloatRect visibleArea(0, 0, (float)event.size.width, (float)event.size.height);
                 window->setView(sf::View(visibleArea));
-              
             }
-        } 
+        }
 
-       
+
         if (currentState == PLAYING) {
             game.update(deltaTime);
             game.render();
+            
         }
         else if (currentState == MENU) {
-            game.renderBackground(); 
+            game.renderBackground();
 
-         
             bool isContinuing = game.isGameStarted();
             float windowHeight = (float)window->getSize().y;
             float center_y = windowHeight / 2.0f;
 
-          
             createButton(isContinuing ? "Continuar" : "Jugar", center_y - 100.f, playText, playRect, font, window, isContinuing);
             createButton("Nueva Partida", center_y, newGameText, newGameRect, font, window, false);
             createButton("Salir", center_y + 100.f, exitText, exitRect, font, window, false);
 
-         
             window->draw(playRect);
             window->draw(newGameRect);
             window->draw(exitRect);
             window->draw(playText);
             window->draw(newGameText);
             window->draw(exitText);
+            game.renderTutorialButton();
+            window->display();
+        }
+        else if (currentState == TUTORIAL) {
+            game.renderBackground();
+
+            
+            sf::RectangleShape backgroundRect;
+            float padding = 30.f;
+            float rectWidth = (float)window->getSize().x - 2 * padding;
+            float rectHeight = (float)window->getSize().y - 150.f;
+
+            backgroundRect.setSize(sf::Vector2f(rectWidth, rectHeight));
+            backgroundRect.setFillColor(sf::Color(0, 0, 0, 180));
+            backgroundRect.setPosition(padding, 120.f);
+            window->draw(backgroundRect);
+
+         
+            sf::Text titleText;
+      
+            window->draw(titleText);
+
+
+            float contentStartX = padding + 20.f; 
+            float contentStartY = 140.f; 
+
+          
+            float totalContentHeight = (float)tutorialRules.size() * 30.f;
+
+          
+            float maxScroll = totalContentHeight - (rectHeight - (contentStartY - backgroundRect.getPosition().y));
+            if (maxScroll < 0) maxScroll = 0.f; 
+
+            
+            if (tutorialScrollY > 0.f) tutorialScrollY = 0.f; 
+            if (tutorialScrollY < -maxScroll) tutorialScrollY = -maxScroll; 
+
+        
+            float currentY = contentStartY + tutorialScrollY;
+
+            for (const std::string& rule : tutorialRules) {
+                sf::Text ruleText;
+                ruleText.setFont(font);
+                ruleText.setString(rule);
+                ruleText.setCharacterSize(24);
+
+              
+                sf::Color textColor = sf::Color::White;
+                if (rule.find("TUTORIAL DE JUEGO") != std::string::npos) {
+                    textColor = sf::Color(0, 255, 255); 
+                }
+                
+                else if (rule.find("COMBINACIONES NIVEL 1 (100 PUNTOS)") != std::string::npos) {
+                    textColor = sf::Color(255, 165, 0); 
+                }
+                
+                else if (rule.find("COMBINACIONES NIVEL 2 (500 PUNTOS)") != std::string::npos) {
+                    textColor = sf::Color(255, 0, 255); 
+                }
+                else if (rule.find("COMBINACIONES NIVEL 3 (2500 PUNTOS)") != std::string::npos) {
+                    textColor = sf::Color::Red; 
+                }
+
+                ruleText.setFillColor(textColor);
+                ruleText.setPosition(contentStartX, currentY);
+
+                
+                if (currentY > backgroundRect.getPosition().y + 10.f &&
+                    currentY < backgroundRect.getPosition().y + rectHeight - 30.f) {
+                    window->draw(ruleText);
+                }
+
+                currentY += 30.f;
+            }
+
+          
+            sf::Text escapeText;
+           
+            window->draw(escapeText);
 
             window->display();
         }
-    } 
+    }
 
     return 0;
 }

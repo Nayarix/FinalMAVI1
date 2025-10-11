@@ -3,9 +3,13 @@
 
 #include <SFML/Graphics.hpp>
 #include <vector>
+#include <string>
+#include <map>
 
 const int GRID_ROWS = 4;
 const int GRID_COLS = 7;
+
+
 
 
 struct CombinationRule {
@@ -36,14 +40,20 @@ public:
     Game();
     ~Game();
 
-    void processEvents(sf::Event& event); 
+    void processEvents(sf::Event& event);
     void update(sf::Time deltaTime);
     void render();
 
-    void resetGame(); 
-    void renderBackground(); 
-    sf::RenderWindow* getWindow() const { return window; } 
-    bool isGameStarted() const { return is_game_started; } 
+    void resetGame();
+    void renderBackground();
+    sf::RenderWindow* getWindow() const { return window; }
+    bool isGameStarted() const { return is_game_started; }
+
+    void renderTutorialButton();
+    std::vector<std::string> getRulesForDisplay() const;
+
+    sf::FloatRect getTutorialButtonBounds() const { return tutorialButtonSprite.getGlobalBounds(); }
+
 
 private:
     void scaleSpriteToWindow(sf::Sprite& sprite, const sf::Texture& texture);
@@ -63,8 +73,6 @@ private:
     sf::Vector2f getGridPosition(int row, int col);
     std::vector<std::vector<int>> grid;
 
-
-
     sf::RenderWindow* window;
     sf::Font font;
     sf::Text text;
@@ -78,6 +86,10 @@ private:
     bool is_fullscreen;
     bool is_game_started;
 
+    sf::Texture tutorialButtonTexture;
+    sf::Sprite tutorialButtonSprite;
+
+
     std::vector<sf::Sprite> placedBlocks;
     std::vector<sf::Vector2f> blockVelocities;
     const float gravity;
@@ -87,6 +99,9 @@ private:
     bool isBlockLaunched;
 
     sf::Vector2f oldWindowSize;
+
+    std::map<int, std::string> blockNames;
+    std::string getBlockName(int id) const;
 };
 
 #endif

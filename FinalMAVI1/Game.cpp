@@ -32,6 +32,7 @@ const int ID_CABALLERODRAGON = 24;
 const int ID_ESPADACREPUSCULO = 25;
 
 
+
 void Game::initializeRules() {
     combinationRules.clear();
 
@@ -126,7 +127,7 @@ void Game::initializeRules() {
 Game::Game() : gravity(500.f) {
     window = new RenderWindow(VideoMode::getDesktopMode(), "Mi Juego SFML con POO", Style::Fullscreen);
     window->setFramerateLimit(60);
-    //window->setMouseCursorVisible(false);
+    window->setMouseCursorVisible(false);
     is_fullscreen = true;
 
     if (!backgroundTexture.loadFromFile("BloquesMAVI1/fondoPrueba2.jpg")) {
@@ -135,11 +136,26 @@ Game::Game() : gravity(500.f) {
     backgroundSprite.setTexture(backgroundTexture);
 
     float originalWidth = backgroundTexture.getSize().x;
-    float windowWidth = window->getSize().x;
+    float windowWidth = (float)window->getSize().x;
     float scale = windowWidth / originalWidth;
     backgroundSprite.setScale(scale, scale);
 
    
+    if (!tutorialButtonTexture.loadFromFile("BloquesMAVI1/GuiaCombinaciones.png")) {
+        std::cerr << "Error al cargar la textura del botón de tutorial" << std::endl;
+        
+    }
+    tutorialButtonSprite.setTexture(tutorialButtonTexture);
+    
+    tutorialButtonSprite.setScale(0.1f, 0.1f);
+
+    
+    
+    float margin = 20.f;
+    float buttonWidth = tutorialButtonSprite.getGlobalBounds().width;
+
+    tutorialButtonSprite.setPosition(windowWidth - buttonWidth - margin, margin);
+
 
        
     std::vector<std::string> texturePaths = {
@@ -188,7 +204,34 @@ Game::Game() : gravity(500.f) {
             std::cerr << "Error al cargar la textura: " << path << std::endl;
         }
     }
+    blockNames[ID_ESPADA] = "Espada";
+    blockNames[ID_ESCUDO] = "Escudo";
+    blockNames[ID_CORONA] = "Corona";
+    blockNames[ID_CETRO] = "Cetro";
+    blockNames[ID_DRAGON] = "Dragón";
 
+    blockNames[ID_EMBLEMA] = "Emblema";
+    blockNames[ID_REYGUERRERO] = "Rey Guerrero";
+    blockNames[ID_ESPADAENCANTADA] = "Espada Encantada";
+    blockNames[ID_CAZADORDEDRAGONES] = "Cazador de Dragones";
+    blockNames[ID_GUARDIANREAL] = "Guardián Real";
+    blockNames[ID_BOLADECRISTAL] = "Bola de Cristal";
+    blockNames[ID_ESCAMADEDRAGON] = "Escama de Dragón";
+    blockNames[ID_HECHICEROREAL] = "Hechicero Real";
+    blockNames[ID_REYDRAGON] = "Rey Dragón";
+    blockNames[ID_DRAGONMAGICO] = "Dragón Mágico";
+
+    blockNames[ID_PALADIN] = "Paladín";
+    blockNames[ID_HEROELEGENDARIO] = "Héroe Legendario";
+    blockNames[ID_DEFENSORDELREINO] = "Defensor del Reino";
+    blockNames[ID_DRAGONDELACORONA] = "Dragón de la Corona";
+    blockNames[ID_SEÑORDELAGUERRA] = "Señor de la Guerra";
+
+    blockNames[ID_AVATARDELREINO] = "Avatar del Reino";
+    blockNames[ID_DRAGONANCESTRAL] = "Dragón Ancestral";
+    blockNames[ID_TITANDEBATALLA] = "Titán de Batalla";
+    blockNames[ID_CABALLERODRAGON] = "Caballero Dragón";
+    blockNames[ID_ESPADACREPUSCULO] = "Espada Crepúsculo";
     initializeRules();
 
 
@@ -354,6 +397,7 @@ void Game::update(sf::Time deltaTime) {
 void Game::render() {
     window->clear();
     window->draw(backgroundSprite);
+   
 
     for (int row = 0; row < GRID_ROWS; ++row) {
         for (int col = 0; col < GRID_COLS; ++col) {
@@ -382,6 +426,7 @@ void Game::render() {
     }
 
     window->draw(text);
+    window->draw(tutorialButtonSprite);
     window->display();
 }
 
@@ -614,4 +659,74 @@ void Game::resetGame() {
 void Game::renderBackground() {
     window->clear();
     window->draw(backgroundSprite);
+}
+
+void Game::renderTutorialButton() {
+    window->draw(tutorialButtonSprite);
+}
+
+std::vector<std::string> Game::getRulesForDisplay() const {
+    std::vector<std::string> rules;
+
+   
+    rules.push_back("TUTORIAL DE JUEGO (COMO COMBINAR)");
+    rules.push_back(" ");
+    rules.push_back("Lanza bloques desde la parte superior de la grilla.");
+    rules.push_back("Combina bloques adyacentes (horizontal o vertical) en");
+    rules.push_back("secuencias de dos o tres tipos para crear un bloque de mayor nivel.");
+    rules.push_back("Las combinaciones son fijas y se listan abajo.");
+    rules.push_back(" ");
+
+
+  
+
+    rules.push_back("COMBINACIONES NIVEL 1 (100 PUNTOS)");
+    for (const auto& rule : combinationRules) {
+        
+        if (rule.BlockTypeA < rule.BlockTypeB && rule.ResultBlockType >= ID_EMBLEMA && rule.ResultBlockType <= ID_DRAGONMAGICO) {
+            std::string ruleStr = getBlockName(rule.BlockTypeA) + " + " +
+                getBlockName(rule.BlockTypeB) + " = " +
+                getBlockName(rule.ResultBlockType);
+            rules.push_back(ruleStr);
+        }
+    }
+    rules.push_back(" ");
+
+    
+    rules.push_back("COMBINACIONES NIVEL 2 (500 PUNTOS)");
+    for (const auto& rule : combinationRules) {
+        
+        if (rule.BlockTypeA < rule.BlockTypeB && rule.ResultBlockType >= ID_PALADIN && rule.ResultBlockType <= ID_SEÑORDELAGUERRA) {
+            std::string ruleStr = getBlockName(rule.BlockTypeA) + " + " +
+                getBlockName(rule.BlockTypeB) + " = " +
+                getBlockName(rule.ResultBlockType);
+            rules.push_back(ruleStr);
+        }
+    }
+    rules.push_back(" ");
+
+
+    
+    rules.push_back("COMBINACIONES NIVEL 3 (2500 PUNTOS)");
+    for (const auto& rule : tripleCombinationRules) {
+        
+        if (rule.BlockTypeA < rule.BlockTypeB && rule.BlockTypeB < rule.BlockTypeC && rule.ResultBlockType >= ID_AVATARDELREINO && rule.ResultBlockType <= ID_ESPADACREPUSCULO) {
+            std::string ruleStr = getBlockName(rule.BlockTypeA) + " + " +
+                getBlockName(rule.BlockTypeB) + " + " +
+                getBlockName(rule.BlockTypeC) + " = " +
+                getBlockName(rule.ResultBlockType);
+            rules.push_back(ruleStr);
+        }
+    }
+
+    return rules;
+}
+
+std::string Game::getBlockName(int id) const {
+    auto it = blockNames.find(id);
+    if (it != blockNames.end()) {
+        return it->second; 
+    }
+  
+    return "ID Desconocido (" + std::to_string(id) + ")";
 }
