@@ -154,8 +154,24 @@ Game::Game() : gravity(500.f) {
     float margin = 20.f;
     float buttonWidth = tutorialButtonSprite.getGlobalBounds().width;
 
+    if (!backgroundMusic.openFromFile("Musica/MedievalMusicwav.wav")) {
+        std::cerr << "Error al cargar la musica" << std::endl;
+    }
+    backgroundMusic.setLoop(true); 
+    backgroundMusic.play();        
+    isMusicPlaying = true;
+
+    
+    if (!musicButtonTexture.loadFromFile("BloquesMAVI1/SimboloMusica.png")) {
+        std::cerr << "Error al cargar la textura del boton de musica" << std::endl;
+    }
+    musicButtonSprite.setTexture(musicButtonTexture);
+    musicButtonSprite.setScale(0.1f, 0.1f);
+
     tutorialButtonSprite.setPosition(windowWidth - buttonWidth - margin, margin);
 
+    float tutorialButtonHeight = tutorialButtonSprite.getGlobalBounds().height;
+    musicButtonSprite.setPosition(windowWidth - buttonWidth - margin, margin + tutorialButtonHeight + margin);
 
        
     std::vector<std::string> texturePaths = {
@@ -242,14 +258,7 @@ Game::Game() : gravity(500.f) {
     float scale_initial = (windowWidth_initial / 1990.0f) * 0.25f;
     blockSprite.setScale(scale_initial, scale_initial);
 
-    if (!font.loadFromFile("arial.ttf")) {
-        std::cerr << "Error al cargar la fuente arial.ttf" << std::endl;
-    }
-    text.setFont(font);
-    text.setCharacterSize(24);
-    text.setFillColor(Color::White);
-    text.setString("Bienvenido a SFML!");
-    text.setPosition(10.f, 10.f);
+    
 
     currentColumnIndex = 3;
     isBlockLaunched = false;
@@ -729,4 +738,9 @@ std::string Game::getBlockName(int id) const {
     }
   
     return "ID Desconocido (" + std::to_string(id) + ")";
+}
+
+
+void Game::renderMusicButton() {
+    window->draw(musicButtonSprite);
 }

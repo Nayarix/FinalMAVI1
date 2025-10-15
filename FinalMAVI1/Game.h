@@ -2,6 +2,7 @@
 #define GAME_H
 
 #include <SFML/Graphics.hpp>
+#include <SFML/Audio.hpp> 
 #include <vector>
 #include <string>
 #include <map>
@@ -9,8 +10,7 @@
 const int GRID_ROWS = 4;
 const int GRID_COLS = 7;
 
-
-
+const float BASE_BLOCK_SCALE_FACTOR = 0.25f;
 
 struct CombinationRule {
     int BlockTypeA;
@@ -34,7 +34,6 @@ struct FallingBlock {
     int blockID;
 };
 
-
 class Game {
 public:
     Game();
@@ -46,13 +45,18 @@ public:
 
     void resetGame();
     void renderBackground();
-    sf::RenderWindow* getWindow() const { return window; }
-    bool isGameStarted() const { return is_game_started; }
-
     void renderTutorialButton();
+    void renderMusicButton();
     std::vector<std::string> getRulesForDisplay() const;
 
+    sf::RenderWindow* getWindow() const { return window; }
+    bool isGameStarted() const { return is_game_started; }
     sf::FloatRect getTutorialButtonBounds() const { return tutorialButtonSprite.getGlobalBounds(); }
+    sf::FloatRect getMusicButtonBounds() const { return musicButtonSprite.getGlobalBounds(); }
+
+    
+    sf::Music backgroundMusic;
+    bool isMusicPlaying;
 
 
 private:
@@ -65,6 +69,7 @@ private:
     void applyCascadingGravity(int col);
 
     const float MRU_FALL_SPEED = 800.0f;
+    const float gravity;
 
     std::vector<CombinationRule> combinationRules;
     std::vector<TripleCombinationRule> tripleCombinationRules;
@@ -88,18 +93,17 @@ private:
 
     sf::Texture tutorialButtonTexture;
     sf::Sprite tutorialButtonSprite;
-
+    sf::Texture musicButtonTexture;
+    sf::Sprite musicButtonSprite;
 
     std::vector<sf::Sprite> placedBlocks;
     std::vector<sf::Vector2f> blockVelocities;
-    const float gravity;
 
     std::vector<float> columnPositions;
     int currentColumnIndex;
     bool isBlockLaunched;
 
     sf::Vector2f oldWindowSize;
-
     std::map<int, std::string> blockNames;
     std::string getBlockName(int id) const;
 };
