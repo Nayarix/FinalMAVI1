@@ -127,7 +127,7 @@ void Game::initializeRules() {
 Game::Game() : gravity(500.f) {
     window = new RenderWindow(VideoMode::getDesktopMode(), "Mi Juego SFML con POO", Style::Fullscreen);
     window->setFramerateLimit(60);
-    window->setMouseCursorVisible(false);
+    window->setMouseCursorVisible(true);
     is_fullscreen = true;
 
     if (!backgroundTexture.loadFromFile("BloquesMAVI1/fondoPrueba2.jpg")) {
@@ -161,6 +161,10 @@ Game::Game() : gravity(500.f) {
     backgroundMusic.play();        
     isMusicPlaying = true;
 
+    if (!placeSoundBuffer.loadFromFile("Musica/SonidoColocarBloque.wav")) {
+        std::cerr << "Error al cargar el efecto de sonido SonidoColocarBloque.wav" << std::endl;
+    }
+    placeSound.setBuffer(placeSoundBuffer);
     
     if (!musicButtonTexture.loadFromFile("BloquesMAVI1/SimboloMusica.png")) {
         std::cerr << "Error al cargar la textura del boton de musica" << std::endl;
@@ -173,7 +177,17 @@ Game::Game() : gravity(500.f) {
     float tutorialButtonHeight = tutorialButtonSprite.getGlobalBounds().height;
     musicButtonSprite.setPosition(windowWidth - buttonWidth - margin, margin + tutorialButtonHeight + margin);
 
-       
+
+    if (!font.loadFromFile("arial.ttf")) {
+        std::cerr << "Error al cargar la fuente arial.ttf" << std::endl;
+    }
+    score = 0;
+    scoreText.setFont(font); 
+    scoreText.setCharacterSize(30);
+    scoreText.setFillColor(sf::Color::Yellow);
+    scoreText.setPosition(20.f, 60.f);
+
+
     std::vector<std::string> texturePaths = {
         //Bloques de primer nivel
         "BloquesMAVI1/Espada.png",
@@ -284,13 +298,13 @@ void Game::processEvents(sf::Event& event) {
 
 
         if (!isBlockLaunched && cascadingBlocks.empty()) {
-            if (event.key.code == sf::Keyboard::Left) {
+            if (event.key.code == sf::Keyboard::Left || event.key.code == sf::Keyboard::A) {
                 currentColumnIndex = std::max(0, currentColumnIndex - 1);
-                spawnNewBlock();
+                updateBlockPosition();
             }
-            if (event.key.code == sf::Keyboard::Right) {
+            if (event.key.code == sf::Keyboard::Right || event.key.code == sf::Keyboard::D) {
                 currentColumnIndex = std::min(GRID_COLS - 1, currentColumnIndex + 1);
-                spawnNewBlock();
+                updateBlockPosition();
             }
 
             if (event.key.code == sf::Keyboard::Space) {
@@ -302,13 +316,14 @@ void Game::processEvents(sf::Event& event) {
             }
 
            
-            if (event.key.code == sf::Keyboard::C) {
+            /*if (event.key.code == sf::Keyboard::C) {
                 currentTextureIndex++;
                 if (currentTextureIndex >= blockTextures.size()) {
                     currentTextureIndex = 0;
                 }
                 blockSprite.setTexture(blockTextures[currentTextureIndex]);
             }
+            */
         }
 
        
@@ -360,7 +375,7 @@ void Game::update(sf::Time deltaTime) {
 
             if (currentBlock.getPosition().y >= targetPosY) {
                 grid[targetRow][col] = currentTextureIndex + 1;
-
+                placeSound.play();
                 checkAndProcessInteractions(targetRow, col);
 
                 placedBlocks.pop_back();
@@ -389,9 +404,9 @@ void Game::update(sf::Time deltaTime) {
                 fBlock.sprite.setPosition(fBlock.sprite.getPosition().x, fBlock.targetY);
 
                 grid[fBlock.targetRow][fBlock.col] = fBlock.blockID;
-
+                placeSound.play();
                 checkAndProcessInteractions(fBlock.targetRow, fBlock.col);
-
+                
             }
             else {
                 fBlock.sprite.move(0.f, distanceToTravel);
@@ -406,7 +421,7 @@ void Game::update(sf::Time deltaTime) {
 void Game::render() {
     window->clear();
     window->draw(backgroundSprite);
-   
+    window->setMouseCursorVisible(true);
 
     for (int row = 0; row < GRID_ROWS; ++row) {
         for (int col = 0; col < GRID_COLS; ++col) {
@@ -434,8 +449,10 @@ void Game::render() {
         window->draw(blockSprite);
     }
 
+    window->draw(scoreText);
     window->draw(text);
     window->draw(tutorialButtonSprite);
+    renderMusicButton();
     window->display();
 }
 
@@ -456,16 +473,12 @@ void Game::scaleSpriteToWindow(sf::Sprite& sprite, const sf::Texture& texture) {
 void Game::spawnNewBlock() {
     std::random_device rd;
     std::mt19937 gen(rd());
-    std::uniform_int_distribution<> distrib(0, blockTextures.size() - 1);
+    const size_t MAX_SPAWN_INDEX = 14;
+    std::uniform_int_distribution<size_t> distrib(0, MAX_SPAWN_INDEX);
 
     currentTextureIndex = distrib(gen);
     blockSprite.setTexture(blockTextures[currentTextureIndex]);
-
-    float blockWidth = blockSprite.getGlobalBounds().width;
-    float posX = columnPositions[currentColumnIndex] - (blockWidth / 2.0f);
-    float posY = 50.f;
-
-    blockSprite.setPosition(posX, posY);
+    updateBlockPosition();
 }
 
 void Game::recalculatePositions() {
@@ -489,7 +502,7 @@ void Game::recalculatePositions() {
     }
 
     blockSprite.setScale(blockWidth_scale, blockWidth_scale);
-    spawnNewBlock();
+    updateBlockPosition();
 
     float newWindowWidth = static_cast<float>(window->getSize().x);
     float oldWindowWidth = oldWindowSize.x;
@@ -580,6 +593,15 @@ void Game::checkAndProcessInteractions(int landedRow, int landedCol) {
                    
                     if (rule.BlockTypeA == adjacentBlockType && rule.BlockTypeB == currentBlockType) {
 
+                        int points = 0;
+                        if (rule.ResultBlockType >= 6 && rule.ResultBlockType <= 15) {
+                            points = 100; 
+                        }
+                        else if (rule.ResultBlockType >= 16 && rule.ResultBlockType <= 20) {
+                            points = 500; 
+                        }
+                        score += points;
+
 
                         int resultRow = neighborRow;
                         int resultCol = neighborCol;
@@ -595,7 +617,7 @@ void Game::checkAndProcessInteractions(int landedRow, int landedCol) {
                             applyCascadingGravity(neighborCol);
                         }
 
-                        
+                        scoreText.setString("Puntos: " + std::to_string(score));
                         return;
                     }
                 }
@@ -622,7 +644,9 @@ void Game::checkTripleInteractions(int landedRow, int landedCol) {
          
             if (rule.BlockTypeA == blockA && rule.BlockTypeB == blockB && rule.BlockTypeC == blockC) {
 
-              
+                int points = 2500;
+                score += points;
+
                 grid[rA][cA] = 0;
                 grid[rC][cC] = 0;
                 grid[rB][cB] = rule.ResultBlockType;
@@ -632,6 +656,7 @@ void Game::checkTripleInteractions(int landedRow, int landedCol) {
                 if (cA != cB) applyCascadingGravity(cB);
                 if (cA != cC && cB != cC) applyCascadingGravity(cC);
 
+                scoreText.setString("Puntos: " + std::to_string(score));
                 return true;
             }
         }
@@ -659,6 +684,8 @@ void Game::resetGame() {
     placedBlocks.clear();
     blockVelocities.clear();
     cascadingBlocks.clear(); 
+    score = 0;
+    scoreText.setString("Puntos: 0");
     isBlockLaunched = false;
     currentColumnIndex = 3;
     is_game_started = true; 
@@ -681,6 +708,8 @@ std::vector<std::string> Game::getRulesForDisplay() const {
     rules.push_back("TUTORIAL DE JUEGO (COMO COMBINAR)");
     rules.push_back(" ");
     rules.push_back("Lanza bloques desde la parte superior de la grilla.");
+    rules.push_back("Utiliza las flechas de tu teclado, o los botones A o D, para alternar entre las diferentes columnas.");
+    rules.push_back("Utiliza la barra espaciadora para lanzar el bloque en la columna donde se encuentre.");
     rules.push_back("Combina bloques adyacentes (horizontal o vertical) en");
     rules.push_back("secuencias de dos o tres tipos para crear un bloque de mayor nivel.");
     rules.push_back("Las combinaciones son fijas y se listan abajo.");
@@ -743,4 +772,12 @@ std::string Game::getBlockName(int id) const {
 
 void Game::renderMusicButton() {
     window->draw(musicButtonSprite);
+}
+
+void Game::updateBlockPosition() {
+    float blockWidth = blockSprite.getGlobalBounds().width;
+    float posX = columnPositions[currentColumnIndex] - (blockWidth / 2.0f);
+    float posY = 50.f; 
+
+    blockSprite.setPosition(posX, posY);
 }

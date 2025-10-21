@@ -4,22 +4,21 @@ U:\visual\Proyectos\FinalMAVI1\FinalMAVI1\FinalMAVI1\Game.cpp(138,25): warning C
 U:\visual\Proyectos\FinalMAVI1\FinalMAVI1\FinalMAVI1\Game.cpp(138,25): warning C4244:         [
 U:\visual\Proyectos\FinalMAVI1\FinalMAVI1\FinalMAVI1\Game.cpp(138,25): warning C4244:             T=unsigned int
 U:\visual\Proyectos\FinalMAVI1\FinalMAVI1\FinalMAVI1\Game.cpp(138,25): warning C4244:         ]
-U:\visual\Proyectos\FinalMAVI1\FinalMAVI1\FinalMAVI1\Game.cpp(256,30): warning C4244: 'inicializando': conversión de 'T' a 'float'; posible pérdida de datos
-U:\visual\Proyectos\FinalMAVI1\FinalMAVI1\FinalMAVI1\Game.cpp(256,30): warning C4244:         with
-U:\visual\Proyectos\FinalMAVI1\FinalMAVI1\FinalMAVI1\Game.cpp(256,30): warning C4244:         [
-U:\visual\Proyectos\FinalMAVI1\FinalMAVI1\FinalMAVI1\Game.cpp(256,30): warning C4244:             T=unsigned int
-U:\visual\Proyectos\FinalMAVI1\FinalMAVI1\FinalMAVI1\Game.cpp(256,30): warning C4244:         ]
-U:\visual\Proyectos\FinalMAVI1\FinalMAVI1\FinalMAVI1\Game.cpp(257,31): warning C4244: 'inicializando': conversión de 'T' a 'float'; posible pérdida de datos
-U:\visual\Proyectos\FinalMAVI1\FinalMAVI1\FinalMAVI1\Game.cpp(257,31): warning C4244:         with
-U:\visual\Proyectos\FinalMAVI1\FinalMAVI1\FinalMAVI1\Game.cpp(257,31): warning C4244:         [
-U:\visual\Proyectos\FinalMAVI1\FinalMAVI1\FinalMAVI1\Game.cpp(257,31): warning C4244:             T=unsigned int
-U:\visual\Proyectos\FinalMAVI1\FinalMAVI1\FinalMAVI1\Game.cpp(257,31): warning C4244:         ]
-U:\visual\Proyectos\FinalMAVI1\FinalMAVI1\FinalMAVI1\Game.cpp(307,41): warning C4018: '>=': no coinciden signed/unsigned
-U:\visual\Proyectos\FinalMAVI1\FinalMAVI1\FinalMAVI1\Game.cpp(480,22): warning C4244: 'inicializando': conversión de 'T' a 'float'; posible pérdida de datos
-U:\visual\Proyectos\FinalMAVI1\FinalMAVI1\FinalMAVI1\Game.cpp(480,22): warning C4244:         with
-U:\visual\Proyectos\FinalMAVI1\FinalMAVI1\FinalMAVI1\Game.cpp(480,22): warning C4244:         [
-U:\visual\Proyectos\FinalMAVI1\FinalMAVI1\FinalMAVI1\Game.cpp(480,22): warning C4244:             T=unsigned int
-U:\visual\Proyectos\FinalMAVI1\FinalMAVI1\FinalMAVI1\Game.cpp(480,22): warning C4244:         ]
+U:\visual\Proyectos\FinalMAVI1\FinalMAVI1\FinalMAVI1\Game.cpp(270,30): warning C4244: 'inicializando': conversión de 'T' a 'float'; posible pérdida de datos
+U:\visual\Proyectos\FinalMAVI1\FinalMAVI1\FinalMAVI1\Game.cpp(270,30): warning C4244:         with
+U:\visual\Proyectos\FinalMAVI1\FinalMAVI1\FinalMAVI1\Game.cpp(270,30): warning C4244:         [
+U:\visual\Proyectos\FinalMAVI1\FinalMAVI1\FinalMAVI1\Game.cpp(270,30): warning C4244:             T=unsigned int
+U:\visual\Proyectos\FinalMAVI1\FinalMAVI1\FinalMAVI1\Game.cpp(270,30): warning C4244:         ]
+U:\visual\Proyectos\FinalMAVI1\FinalMAVI1\FinalMAVI1\Game.cpp(271,31): warning C4244: 'inicializando': conversión de 'T' a 'float'; posible pérdida de datos
+U:\visual\Proyectos\FinalMAVI1\FinalMAVI1\FinalMAVI1\Game.cpp(271,31): warning C4244:         with
+U:\visual\Proyectos\FinalMAVI1\FinalMAVI1\FinalMAVI1\Game.cpp(271,31): warning C4244:         [
+U:\visual\Proyectos\FinalMAVI1\FinalMAVI1\FinalMAVI1\Game.cpp(271,31): warning C4244:             T=unsigned int
+U:\visual\Proyectos\FinalMAVI1\FinalMAVI1\FinalMAVI1\Game.cpp(271,31): warning C4244:         ]
+U:\visual\Proyectos\FinalMAVI1\FinalMAVI1\FinalMAVI1\Game.cpp(493,22): warning C4244: 'inicializando': conversión de 'T' a 'float'; posible pérdida de datos
+U:\visual\Proyectos\FinalMAVI1\FinalMAVI1\FinalMAVI1\Game.cpp(493,22): warning C4244:         with
+U:\visual\Proyectos\FinalMAVI1\FinalMAVI1\FinalMAVI1\Game.cpp(493,22): warning C4244:         [
+U:\visual\Proyectos\FinalMAVI1\FinalMAVI1\FinalMAVI1\Game.cpp(493,22): warning C4244:             T=unsigned int
+U:\visual\Proyectos\FinalMAVI1\FinalMAVI1\FinalMAVI1\Game.cpp(493,22): warning C4244:         ]
   main.cpp
   Generando código...
   FinalMAVI1.vcxproj -> U:\visual\Proyectos\FinalMAVI1\FinalMAVI1\FinalMAVI1\Debug\FinalMAVI1.exe

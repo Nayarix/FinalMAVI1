@@ -67,6 +67,7 @@ private:
     void checkAndProcessInteractions(int landedRow, int landedCol);
     void checkTripleInteractions(int landedRow, int landedCol);
     void applyCascadingGravity(int col);
+    void updateBlockPosition();
 
     const float MRU_FALL_SPEED = 800.0f;
     const float gravity;
@@ -106,6 +107,12 @@ private:
     sf::Vector2f oldWindowSize;
     std::map<int, std::string> blockNames;
     std::string getBlockName(int id) const;
+
+    sf::SoundBuffer placeSoundBuffer;
+    sf::Sound placeSound;
+
+    long score; 
+    sf::Text scoreText;
 };
 
 #endif

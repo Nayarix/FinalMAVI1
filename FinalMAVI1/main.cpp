@@ -164,9 +164,9 @@ int main() {
 
             sf::Text titleText;
             titleText.setFont(font);
-            titleText.setString("Guia de Combinaciones (Bloque IDs)");
+            titleText.setString("Guia de Combinaciones");
             titleText.setCharacterSize(60);
-            titleText.setFillColor(sf::Color::Yellow);
+            titleText.setFillColor(sf::Color(0, 150, 0));
             titleText.setOrigin(titleText.getLocalBounds().width / 2.0f, titleText.getLocalBounds().height / 2.0f);
             titleText.setPosition((float)window->getSize().x / 2.0f, 50.f);
             window->draw(titleText);
@@ -188,16 +188,16 @@ int main() {
                 ruleText.setCharacterSize(24);
                 sf::Color textColor = sf::Color::White;
 
-                if (rule.find("--- TUTORIAL") != std::string::npos) {
+                if (rule.find("TUTORIAL") != std::string::npos) {
                     textColor = sf::Color(0, 255, 255);
                 }
-                else if (rule.find("--- COMBINACIONES NIVEL 1 (100 PUNTOS) ---") != std::string::npos) {
+                else if (rule.find("COMBINACIONES NIVEL 1 (100 PUNTOS)") != std::string::npos) {
                     textColor = sf::Color(255, 165, 0);
                 }
-                else if (rule.find("--- COMBINACIONES NIVEL 2 (500 PUNTOS) ---") != std::string::npos) {
+                else if (rule.find("COMBINACIONES NIVEL 2 (500 PUNTOS)") != std::string::npos) {
                     textColor = sf::Color(255, 0, 255);
                 }
-                else if (rule.find("--- COMBINACIONES NIVEL 3 (2500 PUNTOS) ---") != std::string::npos) {
+                else if (rule.find("COMBINACIONES NIVEL 3 (2500 PUNTOS)") != std::string::npos) {
                     textColor = sf::Color::Red;
                 }
 
