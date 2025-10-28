@@ -1,11 +1,13 @@
 #include "Game.h"
-#include <SFML/Graphics.hpp> 
+#include <SFML/Graphics.hpp>
 #include <iostream>
+#include <string> 
 
 enum GameState {
     MENU,
     PLAYING,
-    TUTORIAL
+    TUTORIAL,
+    GAME_OVER 
 };
 
 void createButton(const std::string& textStr, float yPos, sf::Text& text, sf::RectangleShape& rect, const sf::Font& font, sf::RenderWindow* window, bool isContinuing) {
@@ -34,15 +36,19 @@ int main() {
 
     window->setMouseCursorVisible(true);
 
-    std::vector<std::string> tutorialRules = game.getRulesForDisplay();
 
+    std::vector<std::string> tutorialRules = game.getRulesForDisplay();
     sf::Font font;
     if (!font.loadFromFile("arial.ttf")) {
         std::cerr << "Error al cargar la fuente arial.ttf" << std::endl;
         return -1;
     }
+
+
     sf::Text playText, newGameText, exitText;
     sf::RectangleShape playRect, newGameRect, exitRect;
+    sf::Text gameOverText, finalScoreText, menuButtonText;
+    sf::RectangleShape menuButtonRect;
 
     sf::Clock frameClock;
 
@@ -51,7 +57,7 @@ int main() {
         sf::Event event;
 
         while (window->pollEvent(event)) {
-            
+          
             if (event.type == sf::Event::Closed) {
                 window->close();
             }
@@ -60,7 +66,6 @@ int main() {
                 window->setView(sf::View(visibleArea));
             }
 
-            
             if (currentState == PLAYING) {
                 if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Escape) {
                     currentState = MENU;
@@ -82,11 +87,11 @@ int main() {
                 }
             }
 
-            
+
             if (event.type == sf::Event::MouseButtonReleased && event.mouseButton.button == sf::Mouse::Left) {
                 sf::Vector2f mousePos = (sf::Vector2f)sf::Mouse::getPosition(*window);
 
-                
+
                 if (currentState == MENU) {
                     if (playRect.getGlobalBounds().contains(mousePos)) {
                         if (!game.isGameStarted()) {
@@ -104,8 +109,13 @@ int main() {
                         window->close();
                     }
                 }
+  
+                else if (currentState == GAME_OVER) {
+                    if (menuButtonRect.getGlobalBounds().contains(mousePos)) {
+                        currentState = MENU; 
+                    }
+                }
 
-                
                 if (game.getTutorialButtonBounds().contains(mousePos) && currentState != TUTORIAL) {
                     stateBeforeTutorial = currentState;
                     currentState = TUTORIAL;
@@ -121,15 +131,58 @@ int main() {
                         game.isMusicPlaying = true;
                     }
                 }
-            } 
+            }
         } 
 
-        
+
+
         if (currentState == PLAYING) {
             game.update(deltaTime);
             game.render();
-           
+
+
+            if (game.isGridFull()) {
+                currentState = GAME_OVER;
+                window->setMouseCursorVisible(true); 
+            }
         }
+
+
+        else if (currentState == GAME_OVER) {
+            game.renderBackground();
+
+            float windowHeight = (float)window->getSize().y;
+            float center_x = (float)window->getSize().x / 2.f;
+            float center_y = windowHeight / 2.f;
+
+
+            gameOverText.setFont(font);
+            gameOverText.setString("Juego Terminado");
+            gameOverText.setCharacterSize(80);
+            gameOverText.setFillColor(sf::Color::Red);
+            gameOverText.setOrigin(gameOverText.getLocalBounds().width / 2.f, gameOverText.getLocalBounds().height / 2.f);
+            gameOverText.setPosition(center_x, center_y - 100.f);
+            window->draw(gameOverText);
+
+
+            finalScoreText.setFont(font);
+            finalScoreText.setString("Puntaje Final: " + std::to_string(game.getScore()));
+            finalScoreText.setCharacterSize(50);
+            finalScoreText.setFillColor(sf::Color::Yellow);
+            finalScoreText.setOrigin(finalScoreText.getLocalBounds().width / 2.f, finalScoreText.getLocalBounds().height / 2.f);
+            finalScoreText.setPosition(center_x, center_y);
+            window->draw(finalScoreText);
+
+
+            createButton("Menu", center_y + 100.f, menuButtonText, menuButtonRect, font, window, false);
+            window->draw(menuButtonRect);
+            window->draw(menuButtonText);
+
+            game.renderTutorialButton();
+            game.renderMusicButton();
+            window->display();
+        }
+
         else if (currentState == MENU) {
             game.renderBackground();
             bool isContinuing = game.isGameStarted();
@@ -146,10 +199,12 @@ int main() {
             window->draw(playText);
             window->draw(newGameText);
             window->draw(exitText);
-            game.renderTutorialButton(); 
-            game.renderMusicButton();    
+            game.renderTutorialButton();
+            game.renderMusicButton();
             window->display();
         }
+
+     
         else if (currentState == TUTORIAL) {
             game.renderBackground();
             sf::RectangleShape backgroundRect;
@@ -210,9 +265,9 @@ int main() {
                 currentY += 30.f;
             }
             game.renderTutorialButton();
-            game.renderMusicButton();    
+            game.renderMusicButton();
             window->display();
         }
-    }
+    } 
     return 0;
 }
